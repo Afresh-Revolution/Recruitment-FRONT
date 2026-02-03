@@ -5,53 +5,48 @@ import Header from '../components/Header'
 import JobDetailModal, { type RoleDetail } from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 
-const AFRESH_ROLES: RoleDetail[] = [
-  { id: '1', title: 'Senior Frontend Engineer', department: 'Engineering', jobType: 'Full-time', location: 'Remote', deadline: 'Oct 25' },
+const CBRILLIANCE_ROLES: RoleDetail[] = [
+  {
+    id: '1',
+    title: 'Senior Frontend Engineer',
+    department: 'Engineering',
+    jobType: 'Full-time',
+    location: 'Remote',
+    deadline: 'Oct 25',
+    description: 'Build and maintain high-performance web applications for cloud infrastructure. You will work with modern frameworks, design systems, and collaborate with backend and design teams to deliver exceptional user experiences.',
+    requirements: [
+      '5+ years of experience with React, TypeScript, or similar',
+      'Strong understanding of responsive design and accessibility',
+      'Experience with cloud platforms and distributed systems',
+      'Excellent problem-solving and code review skills',
+    ],
+    qualificationsIntro: 'Ideal for engineers passionate about cloud-scale frontend.',
+    qualifications: [
+      'BS/MS in Computer Science or equivalent experience',
+      'Portfolio of production React applications',
+      'Experience with testing and CI/CD',
+    ],
+    applicationDeadline: 'Oct 25, 2026',
+  },
   { id: '2', title: 'Product Designer', department: 'Design', jobType: 'Full-time', location: 'Hybrid', deadline: 'Oct 30' },
   { id: '3', title: 'DevOps Specialist', department: 'Engineering', jobType: 'Contract', location: 'Remote', deadline: 'Nov 05' },
   { id: '4', title: 'UX Researcher', department: 'Design', jobType: 'Full-time', location: 'Remote', deadline: 'Nov 10' },
   { id: '5', title: 'Product Manager', department: 'Product', jobType: 'Full-time', location: 'Hybrid', deadline: 'Nov 12' },
   { id: '6', title: 'Backend Engineer', department: 'Engineering', jobType: 'Full-time', location: 'Remote', deadline: 'Nov 15' },
   { id: '7', title: 'Brand Designer', department: 'Design', jobType: 'Contract', location: 'Remote', deadline: 'Nov 18' },
-  {
-    id: '8',
-    title: 'Growth Marketing Lead',
-    department: 'Marketing',
-    jobType: 'Full-time',
-    location: 'Remote',
-    deadline: 'Nov 20',
-    applicationDeadline: 'Nov 12, 2026',
-    description: 'The Managing Director is responsible for providing strategic leadership and overall management of the organization. This role oversees business operations, drives growth, ensures financial sustainability, and represents the company to stakeholders. The Managing Director works closely with senior management to set goals, make key decisions, and ensure the company\'s vision and objectives are achieved efficiently and ethically.',
-    requirements: [
-      'Proven experience in a senior leadership role, preferably as a Managing Director, CEO, or Operations Manager',
-      'Strong strategic planning and business development skills',
-      'Ability to manage teams and operations remotely using digital collaboration tools',
-      'Excellent decision-making, leadership, and problem-solving abilities',
-      'Strong communication and presentation skills for virtual meetings and stakeholder engagement',
-      'Financial management and budgeting experience',
-      'High level of integrity, professionalism, and accountability',
-      'Proficiency in online tools such as email, video conferencing, project management, and cloud-based systems',
-    ],
-    qualificationsIntro: 'Unemployed individuals seeking leadership and management experience.',
-    qualifications: [
-      'Undergraduate or postgraduate students',
-      'Graduates of recognized institutions',
-      'NYSC members or recent NYSC graduates',
-      'Others with relevant interest, experience, or leadership capacity',
-    ],
-  },
+  { id: '8', title: 'Technical Marketing Lead', department: 'Marketing', jobType: 'Full-time', location: 'Remote', deadline: 'Nov 22' },
 ]
 
 const FILTERS = ['All', 'Engineering', 'Design', 'Product', 'Marketing']
 
-const AfreshRoles = () => {
+const CbrillianceRoles = () => {
   const [activeFilter, setActiveFilter] = useState<string>('All')
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
 
   const filteredRoles = useMemo(() => {
-    if (activeFilter === 'All') return AFRESH_ROLES
-    return AFRESH_ROLES.filter((role) => role.department === activeFilter)
+    if (activeFilter === 'All') return CBRILLIANCE_ROLES
+    return CBRILLIANCE_ROLES.filter((role) => role.department === activeFilter)
   }, [activeFilter])
 
   return (
@@ -77,7 +72,7 @@ const AfreshRoles = () => {
         <Link to="/browse-jobs" className="roles-back-link">
           ← Back to Companies
         </Link>
-        <h1 className="roles-title">AfrESH Roles</h1>
+        <h1 className="roles-title">Cbrilliance Roles</h1>
         <p className="roles-subtitle">Find your next challenge and apply today.</p>
 
         <div className="roles-search-row">
@@ -149,4 +144,4 @@ const AfreshRoles = () => {
   )
 }
 
-export default AfreshRoles
+export default CbrillianceRoles

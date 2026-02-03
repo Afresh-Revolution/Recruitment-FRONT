@@ -89,7 +89,7 @@ const BrowseJobs = () => {
                   </span>
                 </div>
 <Link
-                  to={partner.id === 'afresh' ? '/afresh-roles' : '/opportunities'}
+                  to={partner.id === 'afresh' ? '/afresh-roles' : partner.id === 'cbrilliance' ? '/cbrilliance-roles' : '/opportunities'}
                   className="browse-jobs-select-btn"
                   state={{ partnerId: partner.id }}
                 >
