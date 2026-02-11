@@ -1,58 +1,50 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Briefcase, MapPin, Clock } from 'lucide-react'
 import Header from '../components/Header'
-import JobDetailModal, { type RoleDetail } from '../components/JobDetailModal'
+import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
+import { getRoles } from '../api/roles'
+import type { RoleDetail } from '../api/types'
 
-const AFRESH_ROLES: RoleDetail[] = [
-  { id: '1', title: 'Senior Frontend Engineer', department: 'Engineering', jobType: 'Full-time', location: 'Remote', deadline: 'Oct 25' },
-  { id: '2', title: 'Product Designer', department: 'Design', jobType: 'Full-time', location: 'Hybrid', deadline: 'Oct 30' },
-  { id: '3', title: 'DevOps Specialist', department: 'Engineering', jobType: 'Contract', location: 'Remote', deadline: 'Nov 05' },
-  { id: '4', title: 'UX Researcher', department: 'Design', jobType: 'Full-time', location: 'Remote', deadline: 'Nov 10' },
-  { id: '5', title: 'Product Manager', department: 'Product', jobType: 'Full-time', location: 'Hybrid', deadline: 'Nov 12' },
-  { id: '6', title: 'Backend Engineer', department: 'Engineering', jobType: 'Full-time', location: 'Remote', deadline: 'Nov 15' },
-  { id: '7', title: 'Brand Designer', department: 'Design', jobType: 'Contract', location: 'Remote', deadline: 'Nov 18' },
-  {
-    id: '8',
-    title: 'Growth Marketing Lead',
-    department: 'Marketing',
-    jobType: 'Full-time',
-    location: 'Remote',
-    deadline: 'Nov 20',
-    applicationDeadline: 'Nov 12, 2026',
-    description: 'The Managing Director is responsible for providing strategic leadership and overall management of the organization. This role oversees business operations, drives growth, ensures financial sustainability, and represents the company to stakeholders. The Managing Director works closely with senior management to set goals, make key decisions, and ensure the company\'s vision and objectives are achieved efficiently and ethically.',
-    requirements: [
-      'Proven experience in a senior leadership role, preferably as a Managing Director, CEO, or Operations Manager',
-      'Strong strategic planning and business development skills',
-      'Ability to manage teams and operations remotely using digital collaboration tools',
-      'Excellent decision-making, leadership, and problem-solving abilities',
-      'Strong communication and presentation skills for virtual meetings and stakeholder engagement',
-      'Financial management and budgeting experience',
-      'High level of integrity, professionalism, and accountability',
-      'Proficiency in online tools such as email, video conferencing, project management, and cloud-based systems',
-    ],
-    qualificationsIntro: 'Unemployed individuals seeking leadership and management experience.',
-    qualifications: [
-      'Undergraduate or postgraduate students',
-      'Graduates of recognized institutions',
-      'NYSC members or recent NYSC graduates',
-      'Others with relevant interest, experience, or leadership capacity',
-    ],
-  },
-]
-
-const FILTERS = ['All', 'Engineering', 'Design', 'Product', 'Marketing']
+const DEFAULT_COMPANY_ID = 'afresh'
 
 const AfreshRoles = () => {
+  const location = useLocation()
+  const companyId = (location.state as { companyId?: string } | null)?.companyId ?? DEFAULT_COMPANY_ID
+  const [roles, setRoles] = useState<RoleDetail[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<string>('All')
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
 
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    getRoles(companyId)
+      .then((data) => {
+        if (!cancelled) setRoles(data)
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load roles')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [companyId])
+
+  const filters = useMemo(() => {
+    const departments = Array.from(new Set(roles.map((r) => r.department))).sort()
+    return ['All', ...departments]
+  }, [roles])
+
   const filteredRoles = useMemo(() => {
-    if (activeFilter === 'All') return AFRESH_ROLES
-    return AFRESH_ROLES.filter((role) => role.department === activeFilter)
-  }, [activeFilter])
+    if (activeFilter === 'All') return roles
+    return roles.filter((role) => role.department === activeFilter)
+  }, [roles, activeFilter])
 
   return (
     <div className="roles-page">
@@ -69,81 +61,93 @@ const AfreshRoles = () => {
       )}
       {applyModalRole && (
         <ApplyJobModal
+          companyId={companyId}
+          roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
         />
       )}
-      <main className="roles-main">
+      <main id="main" className="roles-main" tabIndex={-1}>
         <Link to="/browse-jobs" className="roles-back-link">
           ← Back to Companies
         </Link>
         <h1 className="roles-title">AfrESH Roles</h1>
         <p className="roles-subtitle">Find your next challenge and apply today.</p>
 
-        <div className="roles-search-row">
-          <input
-            type="search"
-            className="roles-search"
-            placeholder="Search for roles..."
-            aria-label="Search for roles"
-          />
-          <div className="roles-filters">
-            {FILTERS.map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                className={`roles-filter-btn ${activeFilter === filter ? 'roles-filter-btn--active' : ''}`}
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-        </div>
+        {error && <p className="roles-error" role="alert">{error}</p>}
 
-        <ul className="roles-list">
-          {filteredRoles.map((role) => (
-            <li
-              key={role.id}
-              className="roles-card"
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelectedRole(role)}
-              onKeyDown={(e) => e.key === 'Enter' && setSelectedRole(role)}
-            >
-              <div className="roles-card-left">
-                <div className="roles-card-title-row">
-                  <h2 className="roles-card-title">{role.title}</h2>
-                  <span className="roles-card-department">{role.department}</span>
-                </div>
-                <div className="roles-card-meta">
-                  <span className="roles-card-meta-item">
-                    <Briefcase size={14} aria-hidden />
-                    {role.jobType}
-                  </span>
-                  <span className="roles-card-meta-item">
-                    <MapPin size={14} aria-hidden />
-                    {role.location}
-                  </span>
-                  <span className="roles-card-meta-item roles-card-deadline">
-                    <Clock size={14} aria-hidden />
-                    Apply by {role.deadline}
-                  </span>
-                </div>
+        {loading ? (
+          <p className="roles-loading">Loading…</p>
+        ) : filteredRoles.length === 0 ? (
+          <p className="roles-empty">No roles match your filters.</p>
+        ) : (
+          <>
+            <div className="roles-search-row">
+              <input
+                type="search"
+                className="roles-search"
+                placeholder="Search for roles..."
+                aria-label="Search for roles"
+              />
+              <div className="roles-filters">
+                {filters.map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    className={`roles-filter-btn ${activeFilter === filter ? 'roles-filter-btn--active' : ''}`}
+                    onClick={() => setActiveFilter(filter)}
+                  >
+                    {filter}
+                  </button>
+                ))}
               </div>
-              <button
-                type="button"
-                className="roles-apply-btn"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedRole(role)
-                }}
-              >
-                Apply Now
-              </button>
-            </li>
-          ))}
-        </ul>
+            </div>
+
+            <ul className="roles-list">
+              {filteredRoles.map((role) => (
+                <li
+                  key={role.id}
+                  className="roles-card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedRole(role)}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelectedRole(role)}
+                >
+                  <div className="roles-card-left">
+                    <div className="roles-card-title-row">
+                      <h2 className="roles-card-title">{role.title}</h2>
+                      <span className="roles-card-department">{role.department}</span>
+                    </div>
+                    <div className="roles-card-meta">
+                      <span className="roles-card-meta-item">
+                        <Briefcase size={14} aria-hidden />
+                        {role.jobType}
+                      </span>
+                      <span className="roles-card-meta-item">
+                        <MapPin size={14} aria-hidden />
+                        {role.location}
+                      </span>
+                      <span className="roles-card-meta-item roles-card-deadline">
+                        <Clock size={14} aria-hidden />
+                        Apply by {role.deadline}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="roles-apply-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedRole(role)
+                    }}
+                  >
+                    Apply Now
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </main>
     </div>
   )

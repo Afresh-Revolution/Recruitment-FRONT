@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Upload, AlertCircle } from 'lucide-react'
+import { submitApplication } from '../api/formdata'
 
 const EDUCATION_OPTIONS = ['Student', 'Graduate', 'NYSC', 'Unemployed', 'Others']
 
@@ -8,11 +10,18 @@ const WORKING_DAYS = [
   'Wednesday: 10am - 5pm',
   'Friday: 10am - 4pm',
 ]
+const WORKING_DAYS_STRING = WORKING_DAYS.join(', ')
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_REGEX = /^[\d\s\-+()]{10,}$/
 
+const RESUME_ACCEPT = '.pdf,.doc,.docx'
+const RESUME_MAX_BYTES = 5 * 1024 * 1024 // 5MB
+const RESUME_MAX_LABEL = '5MB'
+
 interface ApplyJobModalProps {
+  companyId: string
+  roleId: string
   jobTitle: string
   onClose: () => void
 }
@@ -28,7 +37,7 @@ interface FormErrors {
   attachment?: string
 }
 
-const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
+const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose }: ApplyJobModalProps) => {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -37,9 +46,27 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
   const [role, setRole] = useState('')
   const [motivation, setMotivation] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previousActiveRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    previousActiveRef.current = document.activeElement as HTMLElement | null
+    closeButtonRef.current?.focus()
+    return () => {
+      previousActiveRef.current?.focus()
+    }
+  }, [])
+
+  const handleClose = () => {
+    previousActiveRef.current?.focus()
+    onClose()
+  }
 
   const toggleEducation = (option: string) => {
     setEducation((prev) =>
@@ -62,15 +89,56 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
     return err
   }, [fullName, email, phone, address, education, role, motivation])
 
+  const validateFile = (f: File | null): string | null => {
+    if (!f) return null
+    const allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    if (!allowed.includes(f.type) && !/\.(pdf|doc|docx)$/i.test(f.name)) return `Use PDF or Word (.doc, .docx) only`
+    if (f.size > RESUME_MAX_BYTES) return `File must be under ${RESUME_MAX_LABEL}`
+    return null
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const chosen = e.target.files?.[0] ?? null
+    const err = validateFile(chosen)
+    setFileError(err)
+    setFile(err ? null : chosen)
+  }
+
   const errors = validate()
   const isValid = Object.keys(errors).length === 0
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitAttempted(true)
+    setSubmitError(null)
     if (!isValid) return
-    // TODO: submit to API
-    setShowSuccess(true)
+    setSubmitting(true)
+    try {
+      const result = await submitApplication({
+        companyId,
+        roleId,
+        jobTitle,
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        education,
+        role,
+        workingDaysTime: WORKING_DAYS_STRING,
+        motivation: motivation.trim(),
+        workRemotely: true,
+        resume: file ?? undefined,
+      })
+      if (result.ok) {
+        setShowSuccess(true)
+      } else {
+        setSubmitError(result.message ?? 'Submission failed')
+      }
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to submit application')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleSuccessClose = () => {
@@ -85,7 +153,7 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
   const showError = (field: keyof FormErrors) =>
     (touched[field] || submitAttempted) && errors[field]
 
-  return (
+  const modalContent = (
     <div
       className="job-detail-overlay apply-job-overlay"
       onClick={handleOverlayClick}
@@ -94,7 +162,7 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
       aria-labelledby="apply-job-title"
     >
       <div className="apply-job-dialog" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="job-detail-close" onClick={onClose} aria-label="Close">
+        <button ref={closeButtonRef} type="button" className="job-detail-close" onClick={handleClose} aria-label="Close">
           <X size={20} />
         </button>
 
@@ -248,19 +316,26 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
           </div>
 
           <div className="apply-job-section">
-            <h3 className="apply-job-heading">Attachment</h3>
+            <h3 className="apply-job-heading">Attachment (PDF or Word, max {RESUME_MAX_LABEL})</h3>
             <label className="apply-job-upload">
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                accept={RESUME_ACCEPT}
+                onChange={handleFileChange}
                 className="apply-job-upload-input"
+                aria-invalid={!!fileError}
+                aria-describedby={fileError ? 'apply-file-error' : undefined}
               />
               <Upload size={32} className="apply-job-upload-icon" aria-hidden />
               <span className="apply-job-upload-text">
                 {file ? file.name : 'Upload File'}
               </span>
             </label>
+            {fileError && (
+              <span id="apply-file-error" className="apply-job-error" role="alert">
+                {fileError}
+              </span>
+            )}
           </div>
 
           <div className="apply-job-remote-badge">
@@ -268,9 +343,15 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
             <span>Work is remotely</span>
           </div>
 
+          {submitError && (
+            <p className="apply-job-error apply-job-submit-error" role="alert">
+              {submitError}
+            </p>
+          )}
+
           <div className="apply-job-footer">
-            <button type="submit" className="apply-job-submit">
-              Submit Application
+            <button type="submit" className="apply-job-submit" disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit Application'}
             </button>
           </div>
         </form>
@@ -299,6 +380,11 @@ const ApplyJobModal = ({ jobTitle, onClose }: ApplyJobModalProps) => {
       )}
     </div>
   )
+
+  if (typeof document !== 'undefined' && document.body) {
+    return createPortal(modalContent, document.body)
+  }
+  return modalContent
 }
 
 export default ApplyJobModal

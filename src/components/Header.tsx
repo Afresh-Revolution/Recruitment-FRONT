@@ -1,17 +1,22 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+
+const isBrowseJobsSection =
+  (path: string) =>
+    path === '/browse-jobs' || path === '/afresh-roles' || path === '/cbrilliance-roles'
 
 const Header = () => {
   const location = useLocation()
 
   return (
     <header className="header">
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
       <div className="header-container">
-        <div className="logo">
-          <Sparkles className="logo-icon" />
+        <Link to="/" className="logo" aria-label="C.A.G.E Home">
           <span className="logo-text">C.A.G.E</span>
-        </div>
-        <nav className="nav">
+        </Link>
+        <nav className="nav" aria-label="Main">
           <Link
             to="/"
             className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
@@ -20,9 +25,15 @@ const Header = () => {
           </Link>
           <Link
             to="/browse-jobs"
-            className={`nav-link ${location.pathname === '/browse-jobs' ? 'active' : ''}`}
+            className={`nav-link ${isBrowseJobsSection(location.pathname) ? 'active' : ''}`}
           >
             Browse Jobs
+          </Link>
+          <Link
+            to="/admin"
+            className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+          >
+            Admin
           </Link>
         </nav>
       </div>

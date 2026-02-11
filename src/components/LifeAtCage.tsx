@@ -1,91 +1,159 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import whitelady from '../image/whitelady.jpg'
 import group from '../image/group.jpg'
 import selfie from '../image/selfie.jpg'
 import blacknative from '../image/blacknative.jpg'
 import scaladev from '../image/scaladev.jpg'
 import filmconvert from '../image/filmconvert.jpg'
+import { getGallery } from '../api/gallery'
+
+const DEFAULT_IMAGES = [
+  { id: 1, src: whitelady, alt: 'Woman at desk with laptop' },
+  { id: 2, src: group, alt: 'Group collaboration' },
+  { id: 3, src: selfie, alt: 'Team member taking selfie' },
+  { id: 4, src: blacknative, alt: 'Team member' },
+  { id: 5, src: scaladev, alt: 'Developer with laptop' },
+  { id: 6, src: filmconvert, alt: 'Team working' },
+]
+
+const imagesPerView = 3
 
 const LifeAtCage = () => {
+  const [categoryTag, setCategoryTag] = useState('Life at Cage')
+  const [title, setTitle] = useState('Our Gallery')
+  const [subtitle, setSubtitle] = useState('A glimpse into our community and culture.')
+  const [images, setImages] = useState<Array<{ id: number; src: string; alt: string }>>(DEFAULT_IMAGES)
   const [currentIndex, setCurrentIndex] = useState(0)
-  
-  const images = [
-    { id: 1, src: whitelady, alt: 'Woman at desk with laptop' },
-    { id: 2, src: group, alt: 'Group collaboration' },
-    { id: 3, src: selfie, alt: 'Team member taking selfie' },
-    { id: 4, src: blacknative, alt: 'Team member' },
-    { id: 5, src: scaladev, alt: 'Developer with laptop' },
-    { id: 6, src: filmconvert, alt: 'Team working' },
-  ]
+  const [isPaused, setIsPaused] = useState(false)
+  const [transitionEnabled, setTransitionEnabled] = useState(true)
 
-  const imagesPerView = 3
-  const maxIndex = Math.max(0, images.length - imagesPerView)
+  useEffect(() => {
+    getGallery().then((data) => {
+      if (data?.categoryTag) setCategoryTag(data.categoryTag)
+      if (data?.title) setTitle(data.title)
+      if (data?.subtitle) setSubtitle(data.subtitle)
+      if (data?.images?.length) {
+        setImages(
+          data.images
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+            .map((img, i) => ({
+              id: i + 1,
+              src: img.url,
+              alt: img.alt ?? '',
+            }))
+        )
+      }
+    })
+  }, [])
+
+  const slides = useMemo(
+    () => (images.length >= 3 ? [...images, images[0], images[1], images[2]] : images),
+    [images]
+  )
+  const maxIndex = Math.max(0, slides.length - imagesPerView)
+  const dotCount = Math.min(6, images.length) || 6
+
+  const advance = useCallback(() => {
+    setCurrentIndex((prev) => {
+      if (prev >= maxIndex) {
+        setTransitionEnabled(false)
+        return 0
+      }
+      return prev + 1
+    })
+  }, [maxIndex])
+
+  useEffect(() => {
+    if (!transitionEnabled) {
+      const raf = requestAnimationFrame(() => setTransitionEnabled(true))
+      return () => cancelAnimationFrame(raf)
+    }
+  }, [currentIndex, transitionEnabled])
+
+  useEffect(() => {
+    if (isPaused) return
+    const interval = setInterval(advance, 3000)
+    return () => clearInterval(interval)
+  }, [isPaused, advance])
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => Math.min(prev + 1, maxIndex))
+    if (currentIndex >= maxIndex) {
+      setTransitionEnabled(false)
+      setCurrentIndex(0)
+    } else {
+      setCurrentIndex((prev) => prev + 1)
+    }
   }
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => Math.max(prev - 1, 0))
+    if (currentIndex === 0) {
+      setTransitionEnabled(false)
+      setCurrentIndex(maxIndex)
+    } else {
+      setCurrentIndex((prev) => prev - 1)
+    }
   }
 
-  const visibleImages = images.slice(currentIndex, currentIndex + imagesPerView)
+  const displayIndex = currentIndex === maxIndex ? 0 : currentIndex
 
   return (
     <section className="lifeatcage-section">
       <div className="lifeatcage-container">
-        <div className="lifeatcage-badge">Life at Cage</div>
-        <h2 className="lifeatcage-title">Our Gallery</h2>
-        <p className="lifeatcage-subtitle">A glimpse into our community and culture.</p>
-        
+        <div className="lifeatcage-badge">{categoryTag}</div>
+        <h2 className="lifeatcage-title">{title}</h2>
+        <p className="lifeatcage-subtitle">{subtitle}</p>
+
         <div className="gallery-wrapper">
-          <button 
-            className="gallery-nav-btn prev-btn" 
+          <button
+            type="button"
+            className="gallery-nav-btn prev-btn"
             onClick={prevSlide}
-            disabled={currentIndex === 0}
+            aria-label="Previous slide"
           >
             <ChevronLeft size={24} />
           </button>
-          
-          <div className="gallery-carousel">
-            <div className="gallery-grid">
-              {visibleImages.map((image) => (
-                <div key={image.id} className="gallery-slide">
-                  <img 
-                    src={image.src} 
-                    alt={image.alt}
-                    className="gallery-image"
-                  />
+
+          <div
+            className="gallery-carousel"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <div
+              className="gallery-track"
+              style={{
+                transform: `translateX(calc(-${currentIndex} * (33.333% + 1.25rem)))`,
+                transition: transitionEnabled ? 'transform 0.6s ease' : 'none',
+              }}
+            >
+              {slides.map((image, i) => (
+                <div key={i < images.length ? image.id : `clone-${i}`} className="gallery-slide">
+                  <img src={image.src} alt={image.alt} className="gallery-image" />
                 </div>
               ))}
             </div>
           </div>
-          
-          <button 
-            className="gallery-nav-btn next-btn" 
+
+          <button
+            type="button"
+            className="gallery-nav-btn next-btn"
             onClick={nextSlide}
-            disabled={currentIndex >= maxIndex}
+            aria-label="Next slide"
           >
             <ChevronRight size={24} />
           </button>
         </div>
-        
+
         <div className="gallery-dots">
-          {Array.from({ length: 6 }).map((_, index) => {
-            const dotIndex = index
-            const isActive = Math.floor(currentIndex / imagesPerView) === dotIndex
-            return (
-              <button
-                key={index}
-                className={`gallery-dot ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  const targetIndex = Math.min(dotIndex * imagesPerView, maxIndex)
-                  setCurrentIndex(targetIndex)
-                }}
-              />
-            )
-          })}
+          {Array.from({ length: dotCount }).map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`gallery-dot ${displayIndex === index ? 'active' : ''}`}
+              onClick={() => setCurrentIndex(index)}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
     </section>
@@ -93,7 +161,3 @@ const LifeAtCage = () => {
 }
 
 export default LifeAtCage
-
-
-
-

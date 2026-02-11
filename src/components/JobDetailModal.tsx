@@ -1,18 +1,9 @@
+import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import type { RoleDetail } from '../api/types'
 
-export interface RoleDetail {
-  id: string
-  title: string
-  department: string
-  jobType: string
-  location: string
-  deadline: string
-  description?: string
-  requirements?: string[]
-  qualificationsIntro?: string
-  qualifications?: string[]
-  applicationDeadline?: string
-}
+export type { RoleDetail } from '../api/types'
 
 interface JobDetailModalProps {
   role: RoleDetail
@@ -40,6 +31,9 @@ const DEFAULT_QUALIFICATIONS = [
 ]
 
 const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previousActiveRef = useRef<HTMLElement | null>(null)
+
   const description = role.description ?? DEFAULT_DESCRIPTION
   const requirements = role.requirements ?? DEFAULT_REQUIREMENTS
   const qualificationsIntro = role.qualificationsIntro ?? DEFAULT_QUALIFICATIONS_INTRO
@@ -47,14 +41,27 @@ const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
   const duration = role.jobType
   const applicationDeadline = role.applicationDeadline ?? `${role.deadline}, 2026`
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) onClose()
+  useEffect(() => {
+    previousActiveRef.current = document.activeElement as HTMLElement | null
+    closeButtonRef.current?.focus()
+    return () => {
+      previousActiveRef.current?.focus()
+    }
+  }, [])
+
+  const handleClose = () => {
+    previousActiveRef.current?.focus()
+    onClose()
   }
 
-  return (
-    <div className="job-detail-overlay" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-labelledby="job-detail-title">
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) handleClose()
+  }
+
+  const modalContent = (
+    <div className="job-detail-overlay job-detail-overlay--portal" onClick={handleOverlayClick} role="dialog" aria-modal="true" aria-labelledby="job-detail-title">
       <div className="job-detail-dialog" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="job-detail-close" onClick={onClose} aria-label="Close">
+        <button ref={closeButtonRef} type="button" className="job-detail-close" onClick={handleClose} aria-label="Close">
           <X size={20} />
         </button>
 
@@ -109,7 +116,7 @@ const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
             <button
               type="button"
               className="job-detail-next"
-              onClick={() => (onNext ? onNext(role) : onClose())}
+              onClick={() => (onNext ? onNext(role) : handleClose())}
             >
               Next
             </button>
@@ -118,6 +125,11 @@ const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined' && document.body) {
+    return createPortal(modalContent, document.body)
+  }
+  return modalContent
 }
 
 export default JobDetailModal

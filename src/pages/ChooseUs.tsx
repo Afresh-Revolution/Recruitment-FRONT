@@ -12,7 +12,7 @@ const ChooseUs = () => {
   return (
     <div className="chooseus-page">
       <Header />
-      <main className="chooseus-main">
+      <main id="main" className="chooseus-main" tabIndex={-1}>
         <div className="chooseus-container">
           <div className="chooseus-left">
             <div className="subtitle">Why Choose Us</div>

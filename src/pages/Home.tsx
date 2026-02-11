@@ -11,7 +11,7 @@ const Home = () => {
   return (
     <div className="home-page">
       <Header />
-      <main className="home-main">
+      <main id="main" className="home-main" tabIndex={-1}>
         <Hero />
         <PoweredBy />
         <Opportunities />

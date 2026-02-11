@@ -15,15 +15,17 @@ export interface Job {
 
 interface JobCardProps {
   job: Job
+  onApplyClick?: (job: Job) => void
 }
 
-const JobCard = ({ job }: JobCardProps) => {
+const JobCard = ({ job, onApplyClick }: JobCardProps) => {
+  const logo = job.companyLogo ?? cbrillianceLogo
   return (
     <div className="job-card">
       <div className="job-card-header">
         <div className="job-company">
           <div className="company-logo-wrapper">
-            <img src={cbrillianceLogo} alt={job.company} className="company-logo" />
+            <img src={logo} alt={job.company} className="company-logo" />
           </div>
           <div className="company-info">
             <span className="company-name">{job.company}</span>
@@ -52,7 +54,16 @@ const JobCard = ({ job }: JobCardProps) => {
           <Clock className="deadline-icon" size={16} />
           <span>Deadline: {job.deadline}</span>
         </div>
-        <button className="apply-button">Apply Now</button>
+        <button
+          type="button"
+          className="apply-button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onApplyClick?.(job)
+          }}
+        >
+          Apply Now
+        </button>
       </div>
     </div>
   )
