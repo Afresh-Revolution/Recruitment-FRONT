@@ -26,6 +26,9 @@ function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
     location: r.location,
     deadline,
     applicationDeadline: r.applyByLabel,
+    description: r.description,
+    requirements: r.requirements,
+    qualifications: r.qualifications,
   }
 }
 
@@ -37,7 +40,8 @@ export async function getRoles(companyId: string): Promise<RoleDetail[]> {
     const data = await apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(companyId)}`)
     return (data.roles ?? []).map(mapBackendRoleToDetail)
   } catch {
-    return MOCK_BY_PARTNER[companyId] ?? []
+    // When backend is configured, don't return mock roles (they have non-ObjectId ids and submit will fail)
+    return []
   }
 }
 

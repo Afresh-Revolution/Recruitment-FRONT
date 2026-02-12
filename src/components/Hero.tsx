@@ -1,137 +1,87 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Zap } from 'lucide-react'
-import { getHero } from '../api/hero'
-import type { HeroData } from '../api/types'
-
-const DEFAULT_HERO: HeroData = {
-  headline: {
-    main: 'Accelerate your growth with ',
-    highlight: 'top talent',
-    highlightIcon: '⚡',
-  },
-  description:
-    'Join a network where companies, startups, and entrepreneurs support each other by sharing and engaging with verified talent — automatically.',
-  cta: { text: 'Apply Now', link: '/browse-jobs' },
-  features: [
-    { label: 'Smart Matching', icon: '+', highlighted: true },
-    { label: 'Analytics', icon: null, highlighted: false },
-    { label: 'Global Reach', icon: null, highlighted: true },
-    { label: 'Collaboration', icon: null, highlighted: false },
-    { label: 'Skill Verification', icon: null, highlighted: false },
-  ],
-}
+import laptopImg from '../image/laptop.jpg'
+import programmerImg from '../image/programmer.jpg'
 
 const Hero = () => {
-  const [hero, setHero] = useState<HeroData | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    getHero().then((data) => {
-      if (!cancelled) setHero(data)
-    })
-    return () => { cancelled = true }
-  }, [])
-
-  const h = hero ?? DEFAULT_HERO
-  const headline = h.headline ?? DEFAULT_HERO.headline!
-  const description = h.description ?? DEFAULT_HERO.description
-  const cta = h.cta ?? DEFAULT_HERO.cta!
-  const features = h.features ?? DEFAULT_HERO.features!
-  const panels = h.panels
-
-  const isInternalLink = cta?.link?.startsWith('/')
-
   return (
-    <section className="hero-section">
-      <div className="hero-container">
-        <div className="hero-left">
-          <h1 className="hero-title">
-            {headline?.main}
-            <span className="highlight-orange">{headline?.highlight}</span>
-            {(headline?.highlightIcon ?? '⚡') && (
-              <span className="hero-title-icon" aria-hidden>
-                <Zap size={22} strokeWidth={2.5} />
-              </span>
-            )}
-          </h1>
-          <p className="hero-description">{description}</p>
-          {cta && (
-            isInternalLink ? (
-              <Link to={cta.link} className="hero-cta">
-                {cta.text}
-              </Link>
-            ) : (
-              <a href={cta.link} className="hero-cta" target="_blank" rel="noopener noreferrer">
-                {cta.text}
-              </a>
-            )
-          )}
-          <div className="hero-features">
-            {features?.flatMap((f, i) => [
-              i > 0 ? (
-                <span key={`plus-${i}`} className="feature-tag-plus" aria-hidden>
-                  <Plus size={14} strokeWidth={2.5} />
-                </span>
-              ) : null,
-              <span key={i} className={`feature-tag ${f.highlighted ? 'highlight-green' : ''}`}>
-                {f.label}
-              </span>,
-            ].filter(Boolean))}
+    <div className="hero-main-content">
+      <div className="hero-section">
+        <h1 className="hero-title">
+          Accelerate<br />
+          your growth<br />
+          with <span className="highlight">top<br />talent</span>
+          <span className="sparkle-icon" aria-hidden>✨</span>
+        </h1>
+
+        <p className="hero-description">
+          Join a network where companies, startups, and entrepreneurs support each other by sharing and engaging with verified talent — automatically.
+        </p>
+
+        <Link to="/browse-jobs" className="cta-button">Apply Now</Link>
+
+        <div className="feature-tags">
+          <span className="tag">Smart Matching</span>
+          <span className="tag">AI</span>
+          <span className="tag">Analytics</span>
+          <span className="tag plus-icon" aria-hidden>+</span>
+          <span className="tag highlight-tag">Global Reach</span>
+          <span className="tag">Collaboration</span>
+          <span className="tag plus-icon" aria-hidden>+</span>
+          <span className="tag">Skill Verification</span>
+          <span className="tag plus-icon" aria-hidden>+</span>
+        </div>
+      </div>
+
+      <div className="cards-section">
+        <div className="card card-new-hires" style={{ backgroundImage: `url(${programmerImg})` }}>
+          <div className="card-header">
+            <span className="card-label">New Hires</span>
+            <span className="card-count">+1424</span>
+          </div>
+          <div className="week-indicator">
+            <span className="day">Mo</span>
+            <span className="day">Tu</span>
+            <span className="day">We</span>
+            <span className="day">Th</span>
+            <span className="day">Fr</span>
+            <span className="day">Sa</span>
+            <span className="day">Su</span>
           </div>
         </div>
-        <div className="hero-right">
-          <div className="hero-grid">
-            <div className="hero-grid-col-left">
-              <div className="hero-card laptop-card">
-                <div className="card-image-placeholder">
-                  {panels?.topLeft?.imageUrl ? (
-                    <img src={panels.topLeft.imageUrl} alt={panels.topLeft.alt ?? ''} />
-                  ) : (
-                    <p>Laptop with code image</p>
-                  )}
-                </div>
-              </div>
-              <div className="hero-card person-card">
-                <div className="card-image-placeholder">
-                  {panels?.bottomRight?.imageUrl ? (
-                    <img src={panels.bottomRight.imageUrl} alt={panels.bottomRight.alt ?? ''} />
-                  ) : (
-                    <p>Person with laptop and stickers image</p>
-                  )}
-                </div>
-              </div>
+
+        <div className="card card-laptop">
+          <img src={laptopImg} alt="" className="card-laptop-img" />
+        </div>
+
+        <div className="card card-shine">
+          <div className="profile-icons">
+            <div className="profile-icon icon-1">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+                <path d="M10 11C12.2091 11 14 9.20914 14 7C14 4.79086 12.2091 3 10 3C7.79086 3 6 4.79086 6 7C6 9.20914 7.79086 11 10 11Z" fill="currentColor" />
+                <path d="M10 13C6.13401 13 3 16.134 3 20H17C17 16.134 13.866 13 10 13Z" fill="currentColor" />
+              </svg>
             </div>
-            <div className="hero-grid-col-right">
-              <div className="hero-card purple-card">
-                <div className="card-header">
-                  <span className="card-label">{panels?.topRight?.label ?? 'New Hires'}</span>
-                  <span className="card-value">{panels?.topRight?.count ?? '+1424'}</span>
-                </div>
-                <div
-                  className="card-image-placeholder"
-                  style={panels?.topRight?.backgroundImage ? { backgroundImage: `url(${panels.topRight.backgroundImage})`, backgroundSize: 'cover' } : undefined}
-                >
-                  {!panels?.topRight?.backgroundImage && <p>Person with laptop image</p>}
-                </div>
-                <div className="card-footer">
-                  <span>{(panels?.topRight?.monthLabels ?? ['Ap', 'My', 'Ju', 'Jl', 'Au', 'Se']).join(' ')}</span>
-                </div>
-              </div>
-              <div className="hero-card hero-card-fourth">
-                <div className="card-image-placeholder">
-                  {panels?.bottomLeft?.backgroundImage ? (
-                    <img src={panels.bottomLeft.backgroundImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <p>Team / collaboration image</p>
-                  )}
-                </div>
-              </div>
+            <div className="profile-icon icon-2">+</div>
+          </div>
+          <div className="connection-circles">
+            <div className="circle" aria-hidden />
+            <div className="circle" aria-hidden />
+            <div className="circle" aria-hidden />
+          </div>
+          <p className="card-text">Shine together</p>
+        </div>
+
+        <div className="card card-person">
+          <div className="person-image">
+            <div className="floating-icons">
+              <span className="float-icon" aria-hidden>💼</span>
+              <span className="float-icon" aria-hidden>🎯</span>
+              <span className="float-icon" aria-hidden>🌟</span>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
 

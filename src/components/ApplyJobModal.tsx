@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Upload, AlertCircle } from 'lucide-react'
 import { submitApplication } from '../api/formdata'
+import { getCompanyObjectId } from '../api/destination'
 
 const EDUCATION_OPTIONS = ['Student', 'Graduate', 'NYSC', 'Unemployed', 'Others']
 
@@ -18,6 +19,7 @@ const PHONE_REGEX = /^[\d\s\-+()]{10,}$/
 const RESUME_ACCEPT = '.pdf,.doc,.docx'
 const RESUME_MAX_BYTES = 5 * 1024 * 1024 // 5MB
 const RESUME_MAX_LABEL = '5MB'
+const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/i
 
 interface ApplyJobModalProps {
   companyId: string
@@ -112,10 +114,24 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose }: ApplyJobModalPr
     setSubmitAttempted(true)
     setSubmitError(null)
     if (!isValid) return
+    if (!OBJECT_ID_REGEX.test(roleId)) {
+      setSubmitError('This role could not be loaded from the server. Please go back to the roles list and try again.')
+      return
+    }
     setSubmitting(true)
     try {
+      let effectiveCompanyId = companyId
+      if (!OBJECT_ID_REGEX.test(companyId)) {
+        const resolved = await getCompanyObjectId(companyId)
+        if (!resolved) {
+          setSubmitError('Unable to load company details. Please go to Browse Jobs and select a company, then try again.')
+          setSubmitting(false)
+          return
+        }
+        effectiveCompanyId = resolved
+      }
       const result = await submitApplication({
-        companyId,
+        companyId: effectiveCompanyId,
         roleId,
         jobTitle,
         fullName: fullName.trim(),

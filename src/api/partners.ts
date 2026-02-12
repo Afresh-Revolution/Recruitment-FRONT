@@ -8,7 +8,9 @@ export async function getPartners(): Promise<PartnerCompany[]> {
     return MOCK_PARTNERS
   }
   try {
-    return await getPartnersFromDestination()
+    const list = await getPartnersFromDestination()
+    if (list.length === 0) return MOCK_PARTNERS
+    return list
   } catch {
     return MOCK_PARTNERS
   }

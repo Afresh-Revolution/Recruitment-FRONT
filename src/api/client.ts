@@ -1,4 +1,4 @@
-const getBaseUrl = (): string => {
+export const getBaseUrl = (): string => {
   const url = import.meta.env.VITE_API_BASE_URL
   return typeof url === 'string' && url.trim() !== '' ? url.trim().replace(/\/$/, '') : ''
 }
@@ -27,7 +27,12 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   })
   const contentType = res.headers.get('content-type')
   const isJson = contentType?.includes('application/json')
-  const body = isJson ? await res.json() : await res.text()
+  const body =
+    res.status === 204
+      ? null
+      : isJson
+        ? await res.json()
+        : await res.text()
 
   if (!res.ok) {
     const msg = isJson && typeof body === 'object' && body && 'error' in body

@@ -5,13 +5,16 @@ import Header from '../components/Header'
 import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 import { getRoles } from '../api/roles'
+import { getCompanyObjectId } from '../api/destination'
 import type { RoleDetail } from '../api/types'
 
 const DEFAULT_COMPANY_ID = 'cbrilliance'
+const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/i
 
 const CbrillianceRoles = () => {
   const location = useLocation()
   const companyId = (location.state as { companyId?: string } | null)?.companyId ?? DEFAULT_COMPANY_ID
+  const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null)
   const [roles, setRoles] = useState<RoleDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,6 +39,25 @@ const CbrillianceRoles = () => {
     return () => { cancelled = true }
   }, [companyId])
 
+  useEffect(() => {
+    let cancelled = false
+    getCompanyObjectId(companyId).then((id) => {
+      if (!cancelled && id) setResolvedCompanyId(id)
+    })
+    return () => { cancelled = true }
+  }, [companyId])
+
+  useEffect(() => {
+    if (!resolvedCompanyId) return
+    let cancelled = false
+    getRoles(resolvedCompanyId)
+      .then((data) => {
+        if (!cancelled) setRoles(data)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [resolvedCompanyId])
+
   const filters = useMemo(() => {
     const departments = Array.from(new Set(roles.map((r) => r.department))).sort()
     return ['All', ...departments]
@@ -45,6 +67,8 @@ const CbrillianceRoles = () => {
     if (activeFilter === 'All') return roles
     return roles.filter((role) => role.department === activeFilter)
   }, [roles, activeFilter])
+
+  const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
 
   return (
     <div className="roles-page">
@@ -61,7 +85,7 @@ const CbrillianceRoles = () => {
       )}
       {applyModalRole && (
         <ApplyJobModal
-          companyId={companyId}
+          companyId={companyIdForApply ?? companyId}
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
@@ -129,7 +153,7 @@ const CbrillianceRoles = () => {
                       </span>
                       <span className="roles-card-meta-item roles-card-deadline">
                         <Clock size={14} aria-hidden />
-                        Apply by {role.deadline}
+                        {role.deadline?.startsWith('Apply by') ? role.deadline : role.deadline ? `Apply by ${role.deadline}` : ''}
                       </span>
                     </div>
                   </div>

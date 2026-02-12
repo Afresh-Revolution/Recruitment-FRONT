@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import JobCard, { Job } from './JobCard'
 import JobDetailModal from './JobDetailModal'
 import ApplyJobModal from './ApplyJobModal'
+import { hasBackend } from '../api/client'
 import { getOpportunities } from '../api/opportunities'
 import type { RoleDetail } from '../api/types'
 import type { OpportunityRole, OpportunitiesData } from '../api/types'
@@ -63,10 +64,13 @@ const Opportunities = () => {
         roleByJobId: new Map(apiData.roles.map((r) => [r._id, { roleId: r._id, companyId: r.companyId ?? '' }])),
       }
     }
+    const useMockIds = !hasBackend()
     return {
       jobs: DEFAULT_JOBS,
       roles: DEFAULT_ROLES,
-      roleByJobId: new Map([['1', { roleId: '1', companyId: 'cbrilliance' }], ['2', { roleId: '2', companyId: 'cbrilliance' }], ['3', { roleId: '3', companyId: 'cbrilliance' }]]),
+      roleByJobId: useMockIds
+        ? new Map([['1', { roleId: '1', companyId: 'cbrilliance' }], ['2', { roleId: '2', companyId: 'cbrilliance' }], ['3', { roleId: '3', companyId: 'cbrilliance' }]])
+        : new Map<string, { roleId: string; companyId: string }>(),
     }
   }, [apiData])
 
@@ -81,10 +85,11 @@ const Opportunities = () => {
   const handleOpenApply = (role: RoleDetail) => {
     setSelectedRole(null)
     setApplyModalRole(role)
-    setApplyMeta(roleByJobId.get(role.id) ?? null)
+    setApplyMeta(roleByJobId.get(role.id) ?? { roleId: role.id, companyId: '' })
   }
 
   const viewMore = apiData?.viewMoreButton ?? { text: 'View More Roles', link: '/browse-jobs' }
+  const viewMoreLink = '/browse-jobs' // always navigate to Browse Jobs page
   const sectionTitle = apiData?.sectionTitle ?? 'Available Roles'
   const trendingLabel = apiData?.trendingLabel ?? 'Trending Opportunities'
 
@@ -118,7 +123,7 @@ const Opportunities = () => {
       </div>
       )}
 
-      <Link to={viewMore.link} className="view-more-button">
+      <Link to={viewMoreLink} className="view-more-button">
         {viewMore.text} <ArrowRight className="arrow-icon" size={20} />
       </Link>
     </section>

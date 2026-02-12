@@ -51,7 +51,7 @@ export interface DestinationCompany {
   selectLink: string
 }
 
-/** Backend role (inside GET /api/role?companyId= data.roles[]) */
+/** Backend role (inside GET /api/role or GET /api/role?companyId= data.roles[]) */
 export interface BackendRole {
   _id: string
   title: string
@@ -59,8 +59,16 @@ export interface BackendRole {
   type: string
   location: string
   deadline: string
+  description?: string
+  requirements?: string[]
+  qualifications?: string[]
+  isActive?: boolean
   applyByLabel?: string
   applyLink?: string
+  /** Populated by backend: { _id, name, logo } */
+  companyId?: string | { _id: string; name?: string; logo?: string | null }
+  createdAt?: string
+  updatedAt?: string
 }
 
 /** Backend hero (GET /api/hero) */
@@ -186,8 +194,9 @@ export interface AdminLoginResponse {
 /** Application from GET /api/admin/applications */
 export interface AdminApplication {
   _id: string
-  companyId?: string
-  roleId?: string
+  /** String (ObjectId) or populated { _id, name } */
+  companyId?: string | { _id: string; name?: string; logo?: string | null }
+  roleId?: string | { _id: string; title?: string }
   data?: {
     fullName?: string
     email?: string
@@ -197,11 +206,18 @@ export interface AdminApplication {
     role?: string
     motivation?: string
     attachmentUrl?: string
+    attachmentName?: string
+    /** Some backends use resumeUrl instead of attachmentUrl */
+    resumeUrl?: string
+    attachment?: string
   }
+  /** Some backends put attachment URL at root */
+  attachmentUrl?: string
+  resumeUrl?: string
   status?: string
   reviewedAt?: string
   createdAt?: string
   updatedAt?: string
-  company?: { name: string }
-  role?: { title: string }
+  company?: { _id?: string; name?: string; logo?: string | null }
+  role?: { _id?: string; title?: string }
 }

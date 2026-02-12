@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import { getPartners } from '../api/partners'
 import type { PartnerCompany } from '../api/types'
 import cbrillianceLogo from '../image/cbrilliance.png'
+import afrLogo from '../image/Afr-Logo.jpg'
 
 const BrowseJobs = () => {
   const [partners, setPartners] = useState<PartnerCompany[]>([])
@@ -30,6 +31,7 @@ const BrowseJobs = () => {
 
   const getLogoUrl = (partner: PartnerCompany) => {
     if (partner.id === 'cbrilliance') return cbrillianceLogo
+    if (partner.id === 'afresh') return afrLogo
     return partner.logo
   }
 
@@ -70,7 +72,7 @@ const BrowseJobs = () => {
                     {logoUrl ? (
                       <>
                         <div className="browse-jobs-card-big-image browse-jobs-card-big-image--img">
-                          <img src={logoUrl} alt="" className="browse-jobs-card-logo" aria-hidden />
+                          <img src={logoUrl} alt="" className="browse-jobs-card-logo browse-jobs-card-big-image-logo" aria-hidden />
                         </div>
                         <div className="browse-jobs-card-small-image">
                           <img src={logoUrl} alt={partner.name} className="browse-jobs-card-logo" />

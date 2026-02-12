@@ -4,35 +4,63 @@ import { Briefcase, MapPin, Clock } from 'lucide-react'
 import Header from '../components/Header'
 import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
+import { hasBackend } from '../api/client'
 import { getRoles } from '../api/roles'
+import { getCompanyObjectId } from '../api/destination'
 import type { RoleDetail } from '../api/types'
 
 const DEFAULT_COMPANY_ID = 'afresh'
+const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/i
 
 const AfreshRoles = () => {
   const location = useLocation()
   const companyId = (location.state as { companyId?: string } | null)?.companyId ?? DEFAULT_COMPANY_ID
+  const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null)
   const [roles, setRoles] = useState<RoleDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<string>('All')
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
+  const [applyBlockedMessage, setApplyBlockedMessage] = useState<string | null>(null)
 
+  // When backend is used, resolve company first then fetch roles by ObjectId so role ids are valid for apply.
+  // If company doesn't resolve (e.g. "afresh" not in destination), try getRoles(slug) in case backend accepts it.
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
     setError(null)
-    getRoles(companyId)
-      .then((data) => {
-        if (!cancelled) setRoles(data)
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load roles')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+    if (hasBackend()) {
+      setLoading(true)
+      getCompanyObjectId(companyId)
+        .then((id) => {
+          if (cancelled) return
+          setResolvedCompanyId(id)
+          if (id) return getRoles(id)
+          // Fallback: try fetching by slug in case backend accepts companyId=afresh
+          return getRoles(companyId)
+        })
+        .then((data) => {
+          if (!cancelled && data) setRoles(data)
+        })
+        .catch((err) => {
+          if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load roles')
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    } else {
+      setLoading(true)
+      getRoles(companyId)
+        .then((data) => {
+          if (!cancelled) setRoles(data)
+        })
+        .catch((err) => {
+          if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load roles')
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    }
     return () => { cancelled = true }
   }, [companyId])
 
@@ -46,22 +74,36 @@ const AfreshRoles = () => {
     return roles.filter((role) => role.department === activeFilter)
   }, [roles, activeFilter])
 
+  const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
+
+  const openApplyModal = (role: RoleDetail) => {
+    setApplyBlockedMessage(null)
+    if (!OBJECT_ID_REGEX.test(role.id)) {
+      setApplyBlockedMessage('Application submission requires roles from the server. Please ensure the API is connected and refresh the roles list.')
+      return
+    }
+    setApplyModalRole(role)
+  }
+
   return (
     <div className="roles-page">
       <Header />
       {selectedRole && (
         <JobDetailModal
           role={selectedRole}
-          onClose={() => setSelectedRole(null)}
+          onClose={() => {
+            setSelectedRole(null)
+            setApplyBlockedMessage(null)
+          }}
           onNext={(role) => {
             setSelectedRole(null)
-            setApplyModalRole(role)
+            openApplyModal(role)
           }}
         />
       )}
       {applyModalRole && (
         <ApplyJobModal
-          companyId={companyId}
+          companyId={companyIdForApply ?? companyId}
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
@@ -74,7 +116,9 @@ const AfreshRoles = () => {
         <h1 className="roles-title">AfrESH Roles</h1>
         <p className="roles-subtitle">Find your next challenge and apply today.</p>
 
-        {error && <p className="roles-error" role="alert">{error}</p>}
+        {(error || applyBlockedMessage) && (
+          <p className="roles-error" role="alert">{error ?? applyBlockedMessage}</p>
+        )}
 
         {loading ? (
           <p className="roles-loading">Loading…</p>
@@ -129,7 +173,7 @@ const AfreshRoles = () => {
                       </span>
                       <span className="roles-card-meta-item roles-card-deadline">
                         <Clock size={14} aria-hidden />
-                        Apply by {role.deadline}
+                        {role.deadline?.startsWith('Apply by') ? role.deadline : role.deadline ? `Apply by ${role.deadline}` : ''}
                       </span>
                     </div>
                   </div>
