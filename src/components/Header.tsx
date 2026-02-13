@@ -29,12 +29,6 @@ const Header = () => {
           >
             Browse Jobs
           </Link>
-          <Link
-            to="/admin"
-            className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
-          >
-            Admin
-          </Link>
         </nav>
       </div>
     </header>

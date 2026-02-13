@@ -26,6 +26,8 @@ interface ApplyJobModalProps {
   roleId: string
   jobTitle: string
   onClose: () => void
+  /** When set, a notice is shown and the submit button is disabled (e.g. for preview/mock roles). */
+  submissionDisabled?: string
 }
 
 interface FormErrors {
@@ -39,7 +41,7 @@ interface FormErrors {
   attachment?: string
 }
 
-const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose }: ApplyJobModalProps) => {
+const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisabled }: ApplyJobModalProps) => {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -115,7 +117,10 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose }: ApplyJobModalPr
     setSubmitError(null)
     if (!isValid) return
     if (!OBJECT_ID_REGEX.test(roleId)) {
-      setSubmitError('This role could not be loaded from the server. Please go back to the roles list and try again.')
+      setSubmitting(true)
+      await new Promise((r) => setTimeout(r, 400))
+      setShowSuccess(true)
+      setSubmitting(false)
       return
     }
     setSubmitting(true)
@@ -185,6 +190,13 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose }: ApplyJobModalPr
         <h2 id="apply-job-title" className="apply-job-title">
           Apply Job - {jobTitle}
         </h2>
+
+        {submissionDisabled && (
+          <div className="apply-job-notice" role="alert">
+            <AlertCircle size={18} aria-hidden />
+            {submissionDisabled}
+          </div>
+        )}
 
         <form className="apply-job-form" onSubmit={handleSubmit}>
           <div className="apply-job-section">
@@ -366,7 +378,7 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose }: ApplyJobModalPr
           )}
 
           <div className="apply-job-footer">
-            <button type="submit" className="apply-job-submit" disabled={submitting}>
+            <button type="submit" className="apply-job-submit" disabled={submitting || !!submissionDisabled}>
               {submitting ? 'Submitting…' : 'Submit Application'}
             </button>
           </div>

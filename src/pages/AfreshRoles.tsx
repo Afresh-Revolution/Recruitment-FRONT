@@ -2,11 +2,13 @@ import { useState, useMemo, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Briefcase, MapPin, Clock } from 'lucide-react'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 import { hasBackend } from '../api/client'
 import { getRoles } from '../api/roles'
 import { getCompanyObjectId } from '../api/destination'
+import { MOCK_AFRESH_ROLES } from '../api/mockData'
 import type { RoleDetail } from '../api/types'
 
 const DEFAULT_COMPANY_ID = 'afresh'
@@ -20,9 +22,9 @@ const AfreshRoles = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<string>('All')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
-  const [applyBlockedMessage, setApplyBlockedMessage] = useState<string | null>(null)
 
   // When backend is used, resolve company first then fetch roles by ObjectId so role ids are valid for apply.
   // If company doesn't resolve (e.g. "afresh" not in destination), try getRoles(slug) in case backend accepts it.
@@ -40,10 +42,25 @@ const AfreshRoles = () => {
           return getRoles(companyId)
         })
         .then((data) => {
-          if (!cancelled && data) setRoles(data)
+          if (cancelled) return
+          const list = data ?? []
+          if (list.length > 0) {
+            setRoles(list)
+          } else if (companyId.toLowerCase() === 'afresh') {
+            setRoles(MOCK_AFRESH_ROLES)
+          } else {
+            setRoles([])
+          }
         })
         .catch((err) => {
-          if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load roles')
+          if (!cancelled) {
+            if (companyId.toLowerCase() === 'afresh') {
+              setRoles(MOCK_AFRESH_ROLES)
+              setError(null)
+            } else {
+              setError(err instanceof Error ? err.message : 'Failed to load roles')
+            }
+          }
         })
         .finally(() => {
           if (!cancelled) setLoading(false)
@@ -70,18 +87,21 @@ const AfreshRoles = () => {
   }, [roles])
 
   const filteredRoles = useMemo(() => {
-    if (activeFilter === 'All') return roles
-    return roles.filter((role) => role.department === activeFilter)
-  }, [roles, activeFilter])
+    let list = activeFilter === 'All' ? roles : roles.filter((role) => role.department === activeFilter)
+    const q = searchQuery.trim().toLowerCase()
+    if (q) {
+      list = list.filter(
+        (role) =>
+          role.title.toLowerCase().includes(q) ||
+          (role.department ?? '').toLowerCase().includes(q)
+      )
+    }
+    return list
+  }, [roles, activeFilter, searchQuery])
 
   const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
 
   const openApplyModal = (role: RoleDetail) => {
-    setApplyBlockedMessage(null)
-    if (!OBJECT_ID_REGEX.test(role.id)) {
-      setApplyBlockedMessage('Application submission requires roles from the server. Please ensure the API is connected and refresh the roles list.')
-      return
-    }
     setApplyModalRole(role)
   }
 
@@ -91,10 +111,7 @@ const AfreshRoles = () => {
       {selectedRole && (
         <JobDetailModal
           role={selectedRole}
-          onClose={() => {
-            setSelectedRole(null)
-            setApplyBlockedMessage(null)
-          }}
+          onClose={() => setSelectedRole(null)}
           onNext={(role) => {
             setSelectedRole(null)
             openApplyModal(role)
@@ -107,6 +124,7 @@ const AfreshRoles = () => {
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
+          submissionDisabled={!OBJECT_ID_REGEX.test(applyModalRole.id) ? 'You’re viewing sample roles. Connect your API and load roles from the server to submit an application.' : undefined}
         />
       )}
       <main id="main" className="roles-main" tabIndex={-1}>
@@ -116,14 +134,16 @@ const AfreshRoles = () => {
         <h1 className="roles-title">AfrESH Roles</h1>
         <p className="roles-subtitle">Find your next challenge and apply today.</p>
 
-        {(error || applyBlockedMessage) && (
-          <p className="roles-error" role="alert">{error ?? applyBlockedMessage}</p>
+        {error && (
+          <p className="roles-error" role="alert">{error}</p>
         )}
 
         {loading ? (
           <p className="roles-loading">Loading…</p>
         ) : filteredRoles.length === 0 ? (
-          <p className="roles-empty">No roles match your filters.</p>
+          <p className="roles-empty">
+            {searchQuery.trim() ? 'No roles match your search or filters.' : 'No roles match your filters.'}
+          </p>
         ) : (
           <>
             <div className="roles-search-row">
@@ -132,6 +152,8 @@ const AfreshRoles = () => {
                 className="roles-search"
                 placeholder="Search for roles..."
                 aria-label="Search for roles"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div className="roles-filters">
                 {filters.map((filter) => (
@@ -193,6 +215,7 @@ const AfreshRoles = () => {
           </>
         )}
       </main>
+      <Footer />
     </div>
   )
 }

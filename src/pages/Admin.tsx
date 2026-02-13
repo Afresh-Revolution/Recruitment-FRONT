@@ -394,7 +394,7 @@ const Admin = () => {
           setApplications(list.map(adminAppToApplication))
           setDetailApplication((prev) => (prev?.id === appId ? { ...prev, status: newStatus } : prev))
           let successMsg = 'Status updated.'
-          if (newStatus === 'Accepted' || newStatus === 'Rejected') {
+          if (newStatus === 'Interviewing' || newStatus === 'Accepted' || newStatus === 'Rejected') {
             if (result.emailSent) successMsg += ' Applicant notified by email.'
             else if (result.emailError) successMsg += ' Email failed: ' + result.emailError
             else successMsg += ' If applicant did not get an email, check backend SMTP and that the application has an email address.'

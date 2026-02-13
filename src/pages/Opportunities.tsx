@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import JobCard, { Job } from '../components/JobCard'
 import JobDetailModal, { type RoleDetail } from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
@@ -106,6 +107,7 @@ const Opportunities = () => {
           View More Roles <ArrowRight className="arrow-icon" size={20} />
         </Link>
       </main>
+      <Footer />
     </div>
   )
 }

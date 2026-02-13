@@ -1,4 +1,5 @@
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import { Check } from 'lucide-react'
 
 const ChooseUs = () => {
@@ -58,6 +59,7 @@ const ChooseUs = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

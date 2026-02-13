@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Briefcase, ArrowRight } from 'lucide-react'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import { getPartners } from '../api/partners'
+import { getRoles } from '../api/roles'
+import { getCompanyObjectId } from '../api/destination'
 import type { PartnerCompany } from '../api/types'
 import cbrillianceLogo from '../image/cbrilliance.png'
 import afrLogo from '../image/Afr-Logo.jpg'
@@ -11,6 +14,8 @@ const BrowseJobs = () => {
   const [partners, setPartners] = useState<PartnerCompany[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  /** Actual role count per partner id (from roles API); used so "X Open Roles" matches backend. */
+  const [openRoleCounts, setOpenRoleCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     let cancelled = false
@@ -28,6 +33,23 @@ const BrowseJobs = () => {
       })
     return () => { cancelled = true }
   }, [])
+
+  // Fetch actual role count per partner so "X Open Roles" matches what the roles page shows
+  useEffect(() => {
+    if (partners.length === 0) return
+    let cancelled = false
+    partners.forEach((partner) => {
+      getCompanyObjectId(partner.id)
+        .then((companyId) => getRoles(companyId ?? partner.id))
+        .then((roles) => {
+          if (!cancelled) {
+            setOpenRoleCounts((prev) => ({ ...prev, [partner.id]: roles.length }))
+          }
+        })
+        .catch(() => {})
+    })
+    return () => { cancelled = true }
+  }, [partners])
 
   const getLogoUrl = (partner: PartnerCompany) => {
     if (partner.id === 'cbrilliance') return cbrillianceLogo
@@ -100,7 +122,7 @@ const BrowseJobs = () => {
                     <div className="browse-jobs-card-positions">
                       <span className="browse-jobs-positions-label">Available Positions</span>
                       <span className="browse-jobs-positions-count">
-                        <span className="browse-jobs-dot" /> {partner.openRoles} Open Roles
+                        <span className="browse-jobs-dot" /> {openRoleCounts[partner.id] ?? partner.openRoles} Open Roles
                       </span>
                     </div>
                     <Link
@@ -117,6 +139,7 @@ const BrowseJobs = () => {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   )
 }

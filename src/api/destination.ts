@@ -44,7 +44,8 @@ export async function getCompanyObjectId(slugOrId: string): Promise<string | nul
     c._id === slugOrId ||
     c.name?.toLowerCase() === slug ||
     c.name?.toLowerCase().replace(/\s/g, '') === slug ||
-    c.slug?.toLowerCase() === slug
+    c.slug?.toLowerCase() === slug ||
+    (slug.length >= 3 && c.name?.toLowerCase().includes(slug))
 
   try {
     const dest = await getDestination()

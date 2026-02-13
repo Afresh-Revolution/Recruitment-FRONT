@@ -127,14 +127,23 @@ export async function exportAdminApplicationsCsv(companyId?: string): Promise<{ 
   }
 }
 
-/** Response from PATCH /api/admin/applications/:id/status when status is hired/approved/rejected */
+/** Response from PATCH /api/admin/applications/:id/status when status triggers applicant email (interviewing, hired, rejected) */
 export interface StatusUpdateResponse {
   application?: { _id: string; status: string; reviewedAt?: string; emailSent?: boolean; emailError?: string | null }
   emailSent?: boolean
   emailError?: string | null
 }
 
-/** Backend: PATCH /api/admin/applications/:id/status — Request { status, message? }. When status is hired/approved/rejected, backend sends applicant email; response includes emailSent, emailError. */
+/**
+ * Backend: PATCH /api/admin/applications/:id/status
+ * Request: { status, message? }. Status one of: pending | reviewed | interviewing | hired | approved | rejected.
+ *
+ * Backend contract (professional expectation):
+ * - interviewing: persist status and send applicant email (e.g. "You have been scheduled for an interview").
+ * - hired | approved: persist status and send applicant email (e.g. "You have been accepted").
+ * - rejected: persist status and send applicant email (e.g. "Your application was not successful"); optional message in body for custom text.
+ * For any of the above, response should include emailSent (boolean) and emailError (string | null) so the admin UI can show delivery feedback.
+ */
 export async function updateApplicationStatus(
   applicationId: string,
   status: 'pending' | 'reviewed' | 'interviewing' | 'hired' | 'approved' | 'rejected',

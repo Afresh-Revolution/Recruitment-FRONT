@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import laptopImg from '../image/laptop.jpg'
 import programmerImg from '../image/programmer.jpg'
+import womenImg from '../image/women.jpg'
+import scalaImg from '../image/scaladev.jpg'
 
 const Hero = () => {
   return (
@@ -9,17 +11,22 @@ const Hero = () => {
         <h1 className="hero-title">
           Accelerate<br />
           your growth<br />
-          with <span className="highlight">top<br />talent</span>
-          <span className="sparkle-icon" aria-hidden>✨</span>
+          with <span className="highlight">top talent</span><br />
+          <span className="hero-line-icon" aria-hidden>
+            <svg className="hero-lightning-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="22" fill="#E8D5F2" />
+              <path d="M26 14h-4l-2 10 6-4-2 14 10-18-6 4 2-6z" fill="#6B4C9A" stroke="#5a3d82" strokeWidth="1.2" strokeLinejoin="round" />
+            </svg>
+          </span>
         </h1>
 
         <p className="hero-description">
           Join a network where companies, startups, and entrepreneurs support each other by sharing and engaging with verified talent — automatically.
         </p>
 
-        <Link to="/browse-jobs" className="cta-button">Apply Now</Link>
-
-        <div className="feature-tags">
+        <div className="hero-cta-row">
+          <Link to="/browse-jobs" className="cta-button">Apply Now</Link>
+          <div className="feature-tags">
           <span className="tag">Smart Matching</span>
           <span className="tag">AI</span>
           <span className="tag">Analytics</span>
@@ -29,11 +36,17 @@ const Hero = () => {
           <span className="tag plus-icon" aria-hidden>+</span>
           <span className="tag">Skill Verification</span>
           <span className="tag plus-icon" aria-hidden>+</span>
+          </div>
         </div>
       </div>
 
       <div className="cards-section">
-        <div className="card card-new-hires" style={{ backgroundImage: `url(${programmerImg})` }}>
+        <div className="card card-hero-img">
+          <div className="card-bg" style={{ backgroundImage: `url(${laptopImg})` }} />
+        </div>
+
+        <div className="card card-laptop card-new-hires">
+          <div className="card-bg" style={{ backgroundImage: `url(${programmerImg})` }} />
           <div className="card-header">
             <span className="card-label">New Hires</span>
             <span className="card-count">+1424</span>
@@ -49,11 +62,8 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="card card-laptop">
-          <img src={laptopImg} alt="" className="card-laptop-img" />
-        </div>
-
         <div className="card card-shine">
+          <div className="card-bg" style={{ backgroundImage: `url(${womenImg})` }} />
           <div className="profile-icons">
             <div className="profile-icon icon-1">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
@@ -72,13 +82,7 @@ const Hero = () => {
         </div>
 
         <div className="card card-person">
-          <div className="person-image">
-            <div className="floating-icons">
-              <span className="float-icon" aria-hidden>💼</span>
-              <span className="float-icon" aria-hidden>🎯</span>
-              <span className="float-icon" aria-hidden>🌟</span>
-            </div>
-          </div>
+          <div className="card-bg" style={{ backgroundImage: `url(${scalaImg})` }} />
         </div>
       </div>
     </div>

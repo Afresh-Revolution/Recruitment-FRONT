@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Briefcase, MapPin, Clock } from 'lucide-react'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 import { getRoles } from '../api/roles'
@@ -19,6 +20,7 @@ const CbrillianceRoles = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<string>('All')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
 
@@ -64,9 +66,17 @@ const CbrillianceRoles = () => {
   }, [roles])
 
   const filteredRoles = useMemo(() => {
-    if (activeFilter === 'All') return roles
-    return roles.filter((role) => role.department === activeFilter)
-  }, [roles, activeFilter])
+    let list = activeFilter === 'All' ? roles : roles.filter((role) => role.department === activeFilter)
+    const q = searchQuery.trim().toLowerCase()
+    if (q) {
+      list = list.filter(
+        (role) =>
+          role.title.toLowerCase().includes(q) ||
+          (role.department ?? '').toLowerCase().includes(q)
+      )
+    }
+    return list
+  }, [roles, activeFilter, searchQuery])
 
   const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
 
@@ -103,7 +113,9 @@ const CbrillianceRoles = () => {
         {loading ? (
           <p className="roles-loading">Loading…</p>
         ) : filteredRoles.length === 0 ? (
-          <p className="roles-empty">No roles match your filters.</p>
+          <p className="roles-empty">
+            {searchQuery.trim() ? 'No roles match your search or filters.' : 'No roles match your filters.'}
+          </p>
         ) : (
           <>
             <div className="roles-search-row">
@@ -112,6 +124,8 @@ const CbrillianceRoles = () => {
                 className="roles-search"
                 placeholder="Search for roles..."
                 aria-label="Search for roles"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div className="roles-filters">
                 {filters.map((filter) => (
@@ -173,6 +187,7 @@ const CbrillianceRoles = () => {
           </>
         )}
       </main>
+      <Footer />
     </div>
   )
 }
