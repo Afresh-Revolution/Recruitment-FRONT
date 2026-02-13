@@ -382,13 +382,13 @@ const Admin = () => {
     }
   }
 
-  const handleStatusChange = async (appId: string, newStatus: ApplicationStatus) => {
+  const handleStatusChange = async (appId: string, newStatus: ApplicationStatus, message?: string) => {
     setUpdatingStatusId(appId)
     setStatusError(null)
     try {
       const apiStatus = applicationStatusToApi(newStatus)
       if (useBackendForMutations) {
-        const result = await updateApplicationStatus(appId, apiStatus)
+        const result = await updateApplicationStatus(appId, apiStatus, message)
         if (result.ok) {
           const list = await getAdminApplications()
           setApplications(list.map(adminAppToApplication))

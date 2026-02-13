@@ -26,7 +26,7 @@ interface ApplicationDetailModalProps {
   onClose: () => void
   onMarkReviewed?: (applicationId: string) => void | Promise<void>
   markingReviewed?: boolean
-  onStatusChange?: (applicationId: string, status: ApplicationStatus) => void | Promise<void>
+  onStatusChange?: (applicationId: string, status: ApplicationStatus, message?: string) => void | Promise<void>
   updatingStatus?: boolean
   statusError?: string | null
   onClearError?: () => void
@@ -46,7 +46,10 @@ export default function ApplicationDetailModal({
   onDownloadResume,
 }: ApplicationDetailModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<ApplicationStatus>(application?.status ?? 'Pending')
+  const [statusMessage, setStatusMessage] = useState('')
   const [downloading, setDownloading] = useState(false)
+
+  const showMessageField = selectedStatus === 'Interviewing' || selectedStatus === 'Accepted' || selectedStatus === 'Rejected'
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -57,7 +60,10 @@ export default function ApplicationDetailModal({
   }, [onClose])
 
   useEffect(() => {
-    if (application) setSelectedStatus(application.status)
+    if (application) {
+      setSelectedStatus(application.status)
+      setStatusMessage('')
+    }
   }, [application?.id, application?.status])
 
   if (!application) return null
@@ -129,12 +135,32 @@ export default function ApplicationDetailModal({
                     <button
                       type="button"
                       className="app-detail-btn app-detail-btn--primary app-detail-btn--small"
-                      onClick={() => onStatusChange(application.id, selectedStatus)}
+                      onClick={() => onStatusChange(application.id, selectedStatus, statusMessage.trim() || undefined)}
                       disabled={busy || selectedStatus === application.status}
                     >
                       {updatingStatus ? 'Updating…' : 'Update status'}
                     </button>
                   </div>
+                  {showMessageField && (
+                    <div className="app-detail-status-message-wrap">
+                      <label htmlFor="app-detail-status-message" className="app-detail-status-message-label">
+                        Message to applicant (optional)
+                      </label>
+                      <textarea
+                        id="app-detail-status-message"
+                        className="app-detail-status-message-input"
+                        placeholder="e.g. Congratulations, you have been hired. We will send onboarding details soon."
+                        value={statusMessage}
+                        onChange={(e) => setStatusMessage(e.target.value)}
+                        rows={3}
+                        disabled={busy}
+                        aria-describedby="app-detail-status-message-hint"
+                      />
+                      <span id="app-detail-status-message-hint" className="app-detail-status-message-hint">
+                        Included in the email sent to the applicant when you update status.
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

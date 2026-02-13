@@ -2183,8 +2183,27 @@ body {
 
 .poweredby-carousel-wrap {
   overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  /* Fade left and right so the carousel softens at the edges */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 38%,
+    black 62%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 38%,
+    black 62%,
+    transparent 100%
+  );
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
 }
 
 .poweredby-carousel-track {
@@ -3323,6 +3342,54 @@ body {
   }
 }
 
+.app-detail-status-message-wrap {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.app-detail-status-message-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.app-detail-status-message-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  resize: vertical;
+  min-height: 4rem;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(96, 165, 250, 0.6);
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+  }
+}
+
+.app-detail-status-message-hint {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .app-detail-status-select {
   min-width: 10rem;
   padding: 0.5rem 0.75rem;
@@ -3587,6 +3654,15 @@ body {
     gap: 3rem;
   }
 
+  /* Prevent hero cards overlapping when stacked (tablet and below) */
+  .cards-section .card-hero-img,
+  .cards-section .card-new-hires,
+  .cards-section .card-laptop,
+  .cards-section .card-shine,
+  .cards-section .card-person {
+    transform: none;
+  }
+
   .hero-section .hero-title {
     font-size: 3rem;
   }
@@ -3718,6 +3794,24 @@ body {
     padding: 4rem 1.5rem;
   }
 
+  /* Ensure carousel fade mask applies on small screens (some browsers need it re-set in media query) */
+  .poweredby-carousel-wrap {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 38%,
+      black 62%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 38%,
+      black 62%,
+      transparent 100%
+    );
+  }
+
   .hero-section .hero-title {
     font-size: 2.5rem;
   }
@@ -3725,6 +3819,23 @@ body {
   .cards-section {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  /* Stack hero cards cleanly on small screens: reset transforms and use consistent height */
+  .cards-section .card-hero-img,
+  .cards-section .card-new-hires,
+  .cards-section .card-laptop,
+  .cards-section .card-shine,
+  .cards-section .card-person {
+    transform: none;
+    height: 220px;
+    min-height: 200px;
+  }
+
+  .cards-section .card-hero-img,
+  .cards-section .card-new-hires,
+  .cards-section .card-person {
+    height: 260px;
   }
 
   .whychooseus-title {
