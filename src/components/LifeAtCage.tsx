@@ -1,12 +1,14 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import whitelady from '../image/whitelady.jpg'
-import group from '../image/group.jpg'
-import selfie from '../image/selfie.jpg'
-import blacknative from '../image/blacknative.jpg'
-import scaladev from '../image/scaladev.jpg'
-import filmconvert from '../image/filmconvert.jpg'
+import { getImagePath } from '../lib/assets'
 import { getGallery } from '../api/gallery'
+
+const whitelady = getImagePath('image/whitelady.jpg')
+const group = getImagePath('image/group.jpg')
+const selfie = getImagePath('image/selfie.jpg')
+const blacknative = getImagePath('image/blacknative.jpg')
+const scaladev = getImagePath('image/scaladev.jpg')
+const filmconvert = getImagePath('image/filmconvert.jpg')
 
 const DEFAULT_IMAGES = [
   { id: 1, src: whitelady, alt: 'Woman at desk with laptop' },

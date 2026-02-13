@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
-import darkproject from '../image/Darkprojrct.jpg'
-import filmconvert from '../image/filmconvert.jpg'
+import { getImagePath } from '../lib/assets'
 import { getWhyChooseUs } from '../api/whychooseus'
+
+const darkproject = getImagePath('image/Darkprojrct.jpg')
+const filmconvert = getImagePath('image/filmconvert.jpg')
 
 const DEFAULT_FEATURES = [
   'Escrow system for secure payments',

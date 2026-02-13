@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Star } from 'lucide-react'
-import photographyWhite from '../image/photographyWhite.jpg'
-import photographyBlack from '../image/photographyBlack.jpg'
-import blacknative from '../image/blacknative.jpg'
-import scaladev from '../image/scaladev.jpg'
+import { getImagePath } from '../lib/assets'
 import { getTrainee } from '../api/trainee'
+
+const photographyWhite = getImagePath('image/photographyWhite.jpg')
+const photographyBlack = getImagePath('image/photographyBlack.jpg')
+const blacknative = getImagePath('image/blacknative.jpg')
+const scaladev = getImagePath('image/scaladev.jpg')
 const DEFAULT_TRAINEES: Array<{ id: string; name: string; role: string; rating: number; image: string }> = [
   { id: '1', name: 'Amara Okeke', role: 'Java Developer', rating: 5, image: photographyBlack },
   { id: '2', name: 'Folake Adebayo', role: 'PHP Developer', rating: 4.9, image: photographyWhite },
