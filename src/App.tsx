@@ -46,9 +46,11 @@ function AppRoutes() {
   )
 }
 
+const basename = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || ''
+
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <ErrorBoundary>
         <AppRoutes />
       </ErrorBoundary>

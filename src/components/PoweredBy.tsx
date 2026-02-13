@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import afreshLogo from '../image/AfrESH-LOGO.png'
-import geniuswavLogo from '../image/GeniusWav-LOGO.png'
-import cbrillianceLogo from '../image/cbrilliance-LOGO.png'
+import { getImagePath } from '../lib/assets'
 import { getPowered } from '../api/powered'
+
+const afreshLogo = getImagePath('image/AfrESH-LOGO.png')
+const geniuswavLogo = getImagePath('image/GeniusWav-LOGO.png')
+const cbrillianceLogo = getImagePath('image/cbrilliance-LOGO.png')
 
 const DEFAULT_LOGOS = [
   { src: cbrillianceLogo, alt: 'CBrilliance', link: undefined as string | undefined },

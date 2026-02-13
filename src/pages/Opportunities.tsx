@@ -89,8 +89,11 @@ const Opportunities = () => {
       )}
       {applyModalRole && (
         <ApplyJobModal
+          companyId="cbrilliance"
+          roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
+          submissionDisabled={!applyModalRole.id.match(/^[a-f0-9]{24}$/i) ? 'Connect the backend and use roles from Cbrilliance or Afresh to submit an application.' : undefined}
         />
       )}
       <main id="main" className="opportunities-main" tabIndex={-1}>
