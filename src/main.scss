@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -18,6 +22,7 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 // Header Styles
@@ -153,6 +158,7 @@ body {
 .home-page {
   min-height: 100vh;
   background: #0a0e27;
+  overflow-x: hidden;
 }
 
 .home-main {
@@ -1635,6 +1641,7 @@ body {
 .home-page {
   min-height: 100vh;
   background: #0a0e27;
+  overflow-x: hidden;
 }
 
 .home-main {
@@ -2272,13 +2279,20 @@ body {
 
 // WhyChooseUs Section — full-width background so main background doesn’t show in this block
 .whychooseus-section {
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  max-width: 100%;
   padding: 6rem 2rem;
   background: #1a1f3a;
   box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .whychooseus-section {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
 }
 
 .whychooseus-container {
@@ -2450,13 +2464,20 @@ body {
 
 // LifeAtCage Section
 .lifeatcage-section {
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  max-width: 100%;
   padding: 0;
   box-sizing: border-box;
   background: #1a1f3a;
+}
+
+@media (min-width: 769px) {
+  .lifeatcage-section {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
 }
 
 .lifeatcage-container {
@@ -3656,6 +3677,10 @@ body {
     padding: 1rem 1.5rem;
   }
 
+  .header-container {
+    flex-wrap: wrap;
+  }
+
   .header-right {
     gap: 1rem;
   }
@@ -3670,6 +3695,11 @@ body {
   .chooseus-container {
     grid-template-columns: 1fr;
     gap: 3rem;
+  }
+
+  /* Gallery: 2 slides visible on tablet */
+  .gallery-slide {
+    flex: 0 0 50%;
   }
 
   /* Prevent hero cards overlapping when stacked (tablet and below) */
@@ -3719,6 +3749,11 @@ body {
   .jobs-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    min-width: 0;
+  }
+
+  .job-card {
+    min-width: 0;
   }
 
   .roles-main {
@@ -3856,6 +3891,11 @@ body {
     height: 260px;
   }
 
+  /* Gallery: 2 slides on tablet (same as 1024) */
+  .gallery-slide {
+    flex: 0 0 50%;
+  }
+
   .whychooseus-title {
     font-size: 2rem;
   }
@@ -3869,10 +3909,12 @@ body {
   .trainees-grid {
     flex-wrap: wrap;
     justify-content: center;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .trainee-card {
-    min-width: 200px;
+    min-width: min(200px, 100%);
   }
 
   .partners-grid {
@@ -4079,6 +4121,10 @@ body {
     align-items: stretch;
     text-align: center;
   }
+
+  .admin-table {
+    min-width: 560px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -4086,9 +4132,18 @@ body {
     padding: 0.75rem 0.75rem;
   }
 
+  .header-container {
+    gap: 0.5rem;
+  }
+
   .nav-link {
     padding: 0.4rem 0.6rem;
     font-size: 0.8125rem;
+  }
+
+  /* Gallery: 1 slide on small mobile */
+  .gallery-slide {
+    flex: 0 0 100%;
   }
 
   .logo {
@@ -4133,6 +4188,23 @@ body {
 
   .admin-title {
     font-size: 1.5rem;
+  }
+
+  .not-found-main {
+    padding: 2rem 1rem;
+    margin: 0 0.75rem;
+  }
+
+  .error-boundary {
+    padding: 1rem;
+  }
+
+  .error-boundary-content {
+    max-width: 100%;
+  }
+
+  .browse-jobs-card {
+    min-width: 0;
   }
 }
 
