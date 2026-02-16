@@ -15,3 +15,17 @@ interface ImportMeta {
     readonly SSR: boolean
   }
 }
+
+/** Allow importing image assets so tsc and deploy build succeed. */
+declare module '*.jpg' {
+  const src: string
+  export default src
+}
+declare module '*.jpeg' {
+  const src: string
+  export default src
+}
+declare module '*.png' {
+  const src: string
+  export default src
+}

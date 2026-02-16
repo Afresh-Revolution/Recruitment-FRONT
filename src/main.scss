@@ -12,6 +12,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: #0a0e27;
   color: #ffffff;
+  overflow-x: hidden;
 }
 
 #root {
@@ -2609,11 +2610,28 @@ body {
   }
 }
 
+// Page layout: keep footer at bottom even when content is loading or short
+.home-page,
+.chooseus-page,
+.browse-jobs-page,
+.opportunities-page,
+.roles-page,
+.not-found-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  > main {
+    flex: 1 1 auto;
+  }
+}
+
 // Footer Section
 .footer-section {
   padding: 1rem 0;
   background: #0a0e27;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .footer-container {
