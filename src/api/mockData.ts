@@ -1,10 +1,11 @@
 import type { PartnerCompany, RoleDetail } from './types'
+import { getImagePath } from '../lib/assets'
 
 export const MOCK_PARTNERS: PartnerCompany[] = [
   {
     id: 'cbrilliance',
     name: 'Cbrilliance',
-    logo: '/cbrilliance.png',
+    logo: getImagePath('image/cbrilliance.png'),
     tagline: 'Building the infrastructure for the next generation of cloud',
     description:
       'Building the infrastructure for the next generation of cloud computing. Join us to solve complex distributed systems problems.',
@@ -14,7 +15,7 @@ export const MOCK_PARTNERS: PartnerCompany[] = [
   {
     id: 'afresh',
     name: 'AfrESH',
-    logo: '/afresh.png',
+    logo: getImagePath('image/Afr-Logo.jpg'),
     tagline: 'A digital product studio crafting award-winning experiences',
     description:
       'A digital product studio crafting award-winning experiences for global brands. We value creativity, speed, and precision.',

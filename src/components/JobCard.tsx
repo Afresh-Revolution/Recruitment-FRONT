@@ -1,5 +1,7 @@
 import { MapPin, Briefcase, Clock } from 'lucide-react'
-import cbrillianceLogo from '../image/cbrilliance.png'
+import { getImagePath } from '../lib/assets'
+
+const cbrillianceLogo = getImagePath('image/cbrilliance.png')
 
 export interface Job {
   id: string

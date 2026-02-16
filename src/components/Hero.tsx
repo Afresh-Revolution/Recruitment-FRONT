@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
-import laptopImg from '../image/laptop.jpg'
-import programmerImg from '../image/programmer.jpg'
-import womenImg from '../image/women.jpg'
-import scalaImg from '../image/scaladev.jpg'
+import { getImagePath } from '../lib/assets'
+
+const laptopImg = getImagePath('image/laptop.jpg')
+const programmerImg = getImagePath('image/programmer.jpg')
+const womenImg = getImagePath('image/women.jpg')
+const scalaImg = getImagePath('image/scaladev.jpg')
 
 const Hero = () => {
   return (

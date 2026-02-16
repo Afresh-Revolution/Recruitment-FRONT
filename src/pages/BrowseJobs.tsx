@@ -7,8 +7,10 @@ import { getPartners } from '../api/partners'
 import { getRoles } from '../api/roles'
 import { getCompanyObjectId } from '../api/destination'
 import type { PartnerCompany } from '../api/types'
-import cbrillianceLogo from '../image/cbrilliance.png'
-import afrLogo from '../image/Afr-Logo.jpg'
+import { getImagePath } from '../lib/assets'
+
+const cbrillianceLogo = getImagePath('image/cbrilliance.png')
+const afrLogo = getImagePath('image/Afr-Logo.jpg')
 
 const BrowseJobs = () => {
   const [partners, setPartners] = useState<PartnerCompany[]>([])
