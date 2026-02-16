@@ -18,8 +18,8 @@ const Home = () => {
         <WhyChooseUs />
         <Trainee />
         <LifeAtCage />
-        <Footer />
       </main>
+      <Footer />
     </div>
   )
 }

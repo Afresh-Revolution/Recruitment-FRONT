@@ -89,6 +89,8 @@ const Opportunities = () => {
       )}
       {applyModalRole && (
         <ApplyJobModal
+          companyId="cbrilliance"
+          roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
         />
