@@ -1100,6 +1100,8 @@ body {
 // Apply Job Modal (rendered in portal; ensure on top)
 .apply-job-overlay.job-detail-overlay {
   z-index: 9999;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .apply-job-dialog {
@@ -1108,8 +1110,10 @@ body {
   border-radius: 16px;
   max-width: 800px;
   width: 100%;
+  min-width: 0;
   max-height: calc(100vh - 4rem);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
   box-shadow:
@@ -1146,6 +1150,8 @@ body {
 .apply-job-form {
   padding: 0 1.75rem 1.75rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 .apply-job-section {
@@ -1163,12 +1169,14 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  min-width: 0;
 }
 
 .apply-job-field-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
 
   label {
     font-size: 0.875rem;
@@ -3900,6 +3908,63 @@ body {
     font-size: 2rem;
   }
 
+  .whychooseus-section {
+    padding: 3rem 1rem;
+  }
+
+  .whychooseus-container {
+    gap: 2rem;
+  }
+
+  .whychooseus-right {
+    padding-top: 1.5rem;
+  }
+
+  .whychooseus-description {
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .whychooseus-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .grid-column-right {
+    margin-top: 0;
+  }
+
+  .keyboard-image-wrapper,
+  .ui-image-wrapper {
+    height: 200px;
+    min-height: 160px;
+  }
+
+  .developers-count {
+    padding: 0.75rem 1rem;
+  }
+
+  .count-text {
+    font-size: 0.9375rem;
+  }
+
+  .rating-card {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .rating-score {
+    font-size: 1.25rem;
+  }
+
+  .features-list {
+    gap: 0.75rem;
+  }
+
+  .feature-item {
+    font-size: 0.9375rem;
+    gap: 0.75rem;
+  }
+
   .section-title,
   .trainee-title,
   .lifeatcage-title {
@@ -3907,14 +3972,25 @@ body {
   }
 
   .trainees-grid {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
     justify-content: center;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
 
   .trainee-card {
-    min-width: min(200px, 100%);
+    min-width: 0;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .trainee-card .trainee-rating {
+    margin-top: auto;
   }
 
   .partners-grid {
@@ -4168,6 +4244,64 @@ body {
     font-size: 1.75rem;
   }
 
+  .whychooseus-section {
+    padding: 2.5rem 0.75rem;
+  }
+
+  .whychooseus-title {
+    font-size: 1.75rem;
+    line-height: 1.25;
+  }
+
+  .whychooseus-description {
+    font-size: 0.9375rem;
+  }
+
+  .whychooseus-container {
+    gap: 1.5rem;
+  }
+
+  .whychooseus-right {
+    padding-top: 1rem;
+  }
+
+  .keyboard-image-wrapper,
+  .ui-image-wrapper {
+    height: 160px;
+    min-height: 140px;
+  }
+
+  .avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    margin-left: -8px;
+  }
+
+  .count-text {
+    font-size: 0.875rem;
+  }
+
+  .rating-card {
+    padding: 0.625rem 1rem;
+  }
+
+  .rating-score {
+    font-size: 1.125rem;
+  }
+
+  .rating-label {
+    font-size: 0.8125rem;
+  }
+
+  .feature-item {
+    font-size: 0.875rem;
+  }
+
+  .check-icon-wrapper {
+    width: 20px;
+    height: 20px;
+  }
+
   .chooseus-title {
     font-size: 1.75rem;
   }
@@ -4180,6 +4314,35 @@ body {
   .apply-job-submit {
     width: 100%;
     padding: 0.875rem 1rem;
+  }
+
+  .apply-job-overlay {
+    padding: 0.5rem;
+  }
+
+  .apply-job-dialog {
+    margin: 0.25rem 0 1.5rem;
+    padding: 0.75rem;
+  }
+
+  .apply-job-title {
+    padding: 1rem 2rem 0 0.75rem;
+    font-size: 1.125rem;
+  }
+
+  .apply-job-notice {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+    padding: 0.5rem 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  .apply-job-form {
+    padding: 0 0.75rem 1rem;
+  }
+
+  .apply-job-heading {
+    font-size: 0.9rem;
   }
 
   .not-found-title {
