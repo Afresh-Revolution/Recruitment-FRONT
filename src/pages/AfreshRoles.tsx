@@ -6,7 +6,7 @@ import Footer from '../components/Footer'
 import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 import { hasBackend } from '../api/client'
-import { getRoles } from '../api/roles'
+import { getRoles, AFRESH_COMPANY_OBJECT_ID } from '../api/roles'
 import { getCompanyObjectId } from '../api/destination'
 import { MOCK_AFRESH_ROLES } from '../api/mockData'
 import type { RoleDetail } from '../api/types'
@@ -99,7 +99,7 @@ const AfreshRoles = () => {
     return list
   }, [roles, activeFilter, searchQuery])
 
-  const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
+  const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : (companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : null))
 
   const openApplyModal = (role: RoleDetail) => {
     setApplyModalRole(role)
