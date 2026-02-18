@@ -17,6 +17,7 @@ export {
   getAdminApplicationsSummary,
   exportAdminApplicationsCsv,
   updateApplicationStatus,
+  sendAdminTestEmail,
 } from './admin'
 export type { GetAdminApplicationsParams, AdminApplicationsSummary } from './admin'
 export type {

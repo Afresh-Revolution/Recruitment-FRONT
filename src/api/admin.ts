@@ -136,6 +136,8 @@ export interface StatusUpdateResponse {
 
 /**
  * Backend: PATCH /api/admin/applications/:id/status
+ * Triggers: Status Update.
+ * (Backend may send applicant email when status is interviewing | hired | rejected.)
  * Request: { status, message? }. Status one of: pending | reviewed | interviewing | hired | approved | rejected.
  *
  * Backend contract (professional expectation):
@@ -164,6 +166,26 @@ export async function updateApplicationStatus(
       emailSent,
       emailError,
     }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+/**
+ * Backend: POST /api/admin/test-email
+ * Triggers: Test Email.
+ * Optional: request body { to?: string } to send to a specific address.
+ */
+export async function sendAdminTestEmail(to?: string): Promise<{ ok: boolean; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    await apiRequest<unknown>('/api/admin/test-email', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(to != null ? { to } : {}),
+    })
+    return { ok: true }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
   }

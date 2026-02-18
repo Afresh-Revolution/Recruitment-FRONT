@@ -93,6 +93,17 @@ const Opportunities = () => {
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
+          onSuccess={() => {
+            try {
+              const raw = sessionStorage.getItem('recruitment_applied_role_ids')
+              const arr = raw ? (JSON.parse(raw) as string[]) : []
+              const set = new Set(Array.isArray(arr) ? arr : [])
+              set.add(applyModalRole.id)
+              sessionStorage.setItem('recruitment_applied_role_ids', JSON.stringify([...set]))
+            } catch {
+              // ignore
+            }
+          }}
           submissionDisabled={!applyModalRole.id.match(/^[a-f0-9]{24}$/i) ? 'Connect the backend and use roles from Cbrilliance or Afresh to submit an application.' : undefined}
         />
       )}
