@@ -26,6 +26,8 @@ interface ApplyJobModalProps {
   roleId: string
   jobTitle: string
   onClose: () => void
+  /** Called when user dismisses the success overlay (so parent can mark this role as Applied). */
+  onSuccess?: (roleId: string) => void
   /** When set, a notice is shown and the submit button is disabled (e.g. for preview/mock roles). */
   submissionDisabled?: string
 }
@@ -41,7 +43,7 @@ interface FormErrors {
   attachment?: string
 }
 
-const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisabled }: ApplyJobModalProps) => {
+const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submissionDisabled }: ApplyJobModalProps) => {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -58,6 +60,13 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisable
   const [submitError, setSubmitError] = useState<string | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousActiveRef = useRef<HTMLElement | null>(null)
+  const handleCloseRef = useRef<() => void>(() => {})
+
+  const handleClose = () => {
+    previousActiveRef.current?.focus()
+    onClose()
+  }
+  handleCloseRef.current = handleClose
 
   useEffect(() => {
     previousActiveRef.current = document.activeElement as HTMLElement | null
@@ -67,10 +76,13 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisable
     }
   }, [])
 
-  const handleClose = () => {
-    previousActiveRef.current?.focus()
-    onClose()
-  }
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCloseRef.current()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const toggleEducation = (option: string) => {
     setEducation((prev) =>
@@ -162,10 +174,14 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisable
     }
   }
 
-  const handleSuccessClose = () => {
+  const handleSuccessClose = useCallback(() => {
+    onSuccess?.(roleId)
     setShowSuccess(false)
     onClose()
-  }
+  }, [roleId, onSuccess, onClose])
+
+  const successCloseRef = useRef(handleSuccessClose)
+  successCloseRef.current = handleSuccessClose
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose()
@@ -385,10 +401,21 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisable
         </form>
       </div>
 
-      {showSuccess && (
+    </div>
+  )
+
+  const runSuccessClose = () => {
+    successCloseRef.current?.()
+  }
+
+  const successOverlay =
+    showSuccess &&
+    (() => {
+      const node = (
         <div
           className="apply-success-overlay"
-          onClick={(e) => e.target === e.currentTarget && handleSuccessClose()}
+          onClick={(e) => e.target === e.currentTarget && runSuccessClose()}
+          onKeyDown={(e) => e.key === 'Escape' && runSuccessClose()}
           role="dialog"
           aria-modal="true"
           aria-labelledby="apply-success-title"
@@ -400,19 +427,50 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, submissionDisable
             <p className="apply-success-text">
               Thank you for applying. We&apos;ll be in touch.
             </p>
-            <button type="button" className="apply-success-ok" onClick={handleSuccessClose}>
+            <button
+              type="button"
+              className="apply-success-ok"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                runSuccessClose()
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                runSuccessClose()
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  runSuccessClose()
+                }
+              }}
+            >
               OK
             </button>
           </div>
         </div>
-      )}
-    </div>
-  )
+      )
+      return typeof document !== 'undefined' && document.body
+        ? createPortal(node, document.body)
+        : node
+    })()
 
   if (typeof document !== 'undefined' && document.body) {
-    return createPortal(modalContent, document.body)
+    return (
+      <>
+        {createPortal(modalContent, document.body)}
+        {successOverlay}
+      </>
+    )
   }
-  return modalContent
+  return (
+    <>
+      {modalContent}
+      {successOverlay}
+    </>
+  )
 }
 
 export default ApplyJobModal

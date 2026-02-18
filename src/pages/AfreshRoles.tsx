@@ -13,12 +13,30 @@ import type { RoleDetail } from '../api/types'
 
 const DEFAULT_COMPANY_ID = 'afresh'
 const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/i
+const APPLIED_STORAGE_KEY = 'recruitment_applied_role_ids'
+
+function getAppliedRoleIds(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem(APPLIED_STORAGE_KEY)
+    const arr = raw ? (JSON.parse(raw) as string[]) : []
+    return new Set(Array.isArray(arr) ? arr : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function addAppliedRoleId(roleId: string) {
+  const set = getAppliedRoleIds()
+  set.add(roleId)
+  sessionStorage.setItem(APPLIED_STORAGE_KEY, JSON.stringify([...set]))
+}
 
 const AfreshRoles = () => {
   const location = useLocation()
   const companyId = (location.state as { companyId?: string } | null)?.companyId ?? DEFAULT_COMPANY_ID
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null)
   const [roles, setRoles] = useState<RoleDetail[]>([])
+  const [appliedRoleIds, setAppliedRoleIds] = useState<Set<string>>(getAppliedRoleIds)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<string>('All')
@@ -102,8 +120,11 @@ const AfreshRoles = () => {
   const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : (companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : null))
 
   const openApplyModal = (role: RoleDetail) => {
+    if (appliedRoleIds.has(role.id)) return
     setApplyModalRole(role)
   }
+
+  const isApplied = (roleId: string) => appliedRoleIds.has(roleId)
 
   return (
     <div className="roles-page">
@@ -116,6 +137,7 @@ const AfreshRoles = () => {
             setSelectedRole(null)
             openApplyModal(role)
           }}
+          applied={isApplied(selectedRole.id)}
         />
       )}
       {applyModalRole && (
@@ -123,7 +145,14 @@ const AfreshRoles = () => {
           companyId={companyIdForApply ?? companyId}
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
-          onClose={() => setApplyModalRole(null)}
+          onClose={() => {
+            setApplyModalRole(null)
+            setSelectedRole(null)
+          }}
+          onSuccess={() => {
+            addAppliedRoleId(applyModalRole.id)
+            setAppliedRoleIds(getAppliedRoleIds())
+          }}
           submissionDisabled={!OBJECT_ID_REGEX.test(applyModalRole.id) ? 'You’re viewing sample roles. Connect your API and load roles from the server to submit an application.' : undefined}
         />
       )}
@@ -135,7 +164,12 @@ const AfreshRoles = () => {
         <p className="roles-subtitle">Find your next challenge and apply today.</p>
 
         {error && (
-          <p className="roles-error" role="alert">{error}</p>
+          <div className="roles-error-wrap" role="alert">
+            <p className="roles-error">{error}</p>
+            <button type="button" className="roles-retry-btn" onClick={() => window.location.reload()}>
+              Try again
+            </button>
+          </div>
         )}
 
         {loading ? (
@@ -199,16 +233,22 @@ const AfreshRoles = () => {
                       </span>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="roles-apply-btn"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedRole(role)
-                    }}
-                  >
-                    Apply Now
-                  </button>
+                  {isApplied(role.id) ? (
+                    <span className="roles-apply-btn roles-apply-btn--applied" aria-label="Already applied">
+                      Applied
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="roles-apply-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openApplyModal(role)
+                      }}
+                    >
+                      Apply Now
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

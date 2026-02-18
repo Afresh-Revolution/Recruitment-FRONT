@@ -794,6 +794,39 @@ body {
   margin: 0 0 2rem;
 }
 
+.roles-error-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.roles-error {
+  color: #f87171;
+  margin: 0 0 0.75rem;
+}
+
+.roles-retry-btn {
+  background: rgba(248, 113, 113, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: rgba(248, 113, 113, 0.3);
+    color: #ffffff;
+  }
+}
+
+.roles-loading,
+.roles-empty {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  margin: 2rem 0;
+}
+
 .roles-search-row {
   display: flex;
   flex-wrap: wrap;
@@ -947,6 +980,19 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
   }
+
+  &--applied {
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: default;
+    pointer-events: none;
+
+    &:hover {
+      background: #e5e7eb;
+      transform: none;
+      box-shadow: none;
+    }
+  }
 }
 
 // Job Detail Modal
@@ -1093,7 +1139,17 @@ body {
 
   &:hover {
     background: #15803d;
-    transform: translateY(-1px);
+  }
+
+  &--applied {
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: default;
+    pointer-events: none;
+
+    &:hover {
+      background: #e5e7eb;
+    }
   }
 }
 
@@ -1347,11 +1403,12 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 1001;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  pointer-events: auto;
 }
 
 .apply-success-dialog {
@@ -1379,6 +1436,8 @@ body {
 }
 
 .apply-success-ok {
+  position: relative;
+  z-index: 2;
   background: #166534;
   color: #ffffff;
   border: none;
@@ -1388,6 +1447,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
+  pointer-events: auto;
 
   &:hover {
     background: #15803d;

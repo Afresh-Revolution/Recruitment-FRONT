@@ -11,12 +11,30 @@ import type { RoleDetail } from '../api/types'
 
 const DEFAULT_COMPANY_ID = 'cbrilliance'
 const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/i
+const APPLIED_STORAGE_KEY = 'recruitment_applied_role_ids'
+
+function getAppliedRoleIds(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem(APPLIED_STORAGE_KEY)
+    const arr = raw ? (JSON.parse(raw) as string[]) : []
+    return new Set(Array.isArray(arr) ? arr : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function addAppliedRoleId(roleId: string) {
+  const set = getAppliedRoleIds()
+  set.add(roleId)
+  sessionStorage.setItem(APPLIED_STORAGE_KEY, JSON.stringify([...set]))
+}
 
 const CbrillianceRoles = () => {
   const location = useLocation()
   const companyId = (location.state as { companyId?: string } | null)?.companyId ?? DEFAULT_COMPANY_ID
   const [resolvedCompanyId, setResolvedCompanyId] = useState<string | null>(null)
   const [roles, setRoles] = useState<RoleDetail[]>([])
+  const [appliedRoleIds, setAppliedRoleIds] = useState<Set<string>>(getAppliedRoleIds)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<string>('All')
@@ -80,6 +98,13 @@ const CbrillianceRoles = () => {
 
   const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
 
+  const openApplyModal = (role: RoleDetail) => {
+    if (appliedRoleIds.has(role.id)) return
+    setApplyModalRole(role)
+  }
+
+  const isApplied = (roleId: string) => appliedRoleIds.has(roleId)
+
   return (
     <div className="roles-page">
       <Header />
@@ -89,8 +114,9 @@ const CbrillianceRoles = () => {
           onClose={() => setSelectedRole(null)}
           onNext={(role) => {
             setSelectedRole(null)
-            setApplyModalRole(role)
+            openApplyModal(role)
           }}
+          applied={isApplied(selectedRole.id)}
         />
       )}
       {applyModalRole && (
@@ -98,7 +124,14 @@ const CbrillianceRoles = () => {
           companyId={companyIdForApply ?? companyId}
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
-          onClose={() => setApplyModalRole(null)}
+          onClose={() => {
+            setApplyModalRole(null)
+            setSelectedRole(null)
+          }}
+          onSuccess={() => {
+            addAppliedRoleId(applyModalRole.id)
+            setAppliedRoleIds(getAppliedRoleIds())
+          }}
         />
       )}
       <main id="main" className="roles-main" tabIndex={-1}>
@@ -108,7 +141,14 @@ const CbrillianceRoles = () => {
         <h1 className="roles-title">Cbrilliance Roles</h1>
         <p className="roles-subtitle">Find your next challenge and apply today.</p>
 
-        {error && <p className="roles-error" role="alert">{error}</p>}
+        {error && (
+          <div className="roles-error-wrap" role="alert">
+            <p className="roles-error">{error}</p>
+            <button type="button" className="roles-retry-btn" onClick={() => window.location.reload()}>
+              Try again
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <p className="roles-loading">Loading…</p>
@@ -171,16 +211,22 @@ const CbrillianceRoles = () => {
                       </span>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="roles-apply-btn"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedRole(role)
-                    }}
-                  >
-                    Apply Now
-                  </button>
+                  {isApplied(role.id) ? (
+                    <span className="roles-apply-btn roles-apply-btn--applied" aria-label="Already applied">
+                      Applied
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="roles-apply-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openApplyModal(role)
+                      }}
+                    >
+                      Apply Now
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

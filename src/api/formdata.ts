@@ -8,7 +8,8 @@ export interface SubmitResult {
 
 /**
  * Submit job application.
- * - With resume file: POST /api/formdata/apply (multipart) – backend stores file (multer) and creates application in one request.
+ * - With resume file: POST /api/formdata/apply (multipart) – backend stores file (multer) and creates application.
+ *   Triggers: Application Received.
  * - Without file: POST /api/formdata (JSON) – application only.
  */
 export async function submitApplication(payload: ApplicationPayload): Promise<SubmitResult> {
