@@ -65,10 +65,16 @@ export interface BackendRole {
   isActive?: boolean
   applyByLabel?: string
   applyLink?: string
-  /** Populated by backend: { _id, name, logo } */
+  /** Company ObjectId string or populated { _id, name, logo } */
   companyId?: string | { _id: string; name?: string; logo?: string | null }
   createdAt?: string
   updatedAt?: string
+}
+
+/** Single-role API response (e.g. GET /api/role/:id or create role) */
+export interface RoleApiResponse {
+  ok: boolean
+  data: BackendRole
 }
 
 /** Backend hero (GET /api/hero) */

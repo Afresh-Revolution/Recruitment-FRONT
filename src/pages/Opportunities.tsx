@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import JobCard, { Job } from '../components/JobCard'
 import JobDetailModal, { type RoleDetail } from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
+import ApplicationDetailModal, { ApplicationDetail } from '../components/ApplicationDetailModal'
 import { ArrowRight } from 'lucide-react'
 
 const OPPORTUNITY_ROLE_DETAILS: RoleDetail[] = [
@@ -37,6 +38,7 @@ const OPPORTUNITY_ROLE_DETAILS: RoleDetail[] = [
 const Opportunities = () => {
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
+  const [viewingApplication, setViewingApplication] = useState<ApplicationDetail | null>(null)
 
   const jobs: Job[] = [
     {
@@ -70,8 +72,25 @@ const Opportunities = () => {
   ]
 
   const handleApplyClick = (job: Job) => {
-    const role = OPPORTUNITY_ROLE_DETAILS.find((r) => r.id === job.id)
-    if (role) setSelectedRole(role)
+    const existingApp = getApplication(job.id)
+    if (existingApp) {
+      setViewingApplication(existingApp)
+    } else {
+      const role = OPPORTUNITY_ROLE_DETAILS.find((r) => r.id === job.id)
+      if (role) setSelectedRole(role)
+    }
+  }
+
+  // Helper to get application from local storage
+  const getApplication = (roleId: string): ApplicationDetail | null => {
+    try {
+      const raw = localStorage.getItem('recruitment_applications')
+      if (!raw) return null
+      const apps = JSON.parse(raw)
+      return apps[roleId] || null
+    } catch {
+      return null
+    }
   }
 
   return (
@@ -80,10 +99,15 @@ const Opportunities = () => {
       {selectedRole && (
         <JobDetailModal
           role={selectedRole}
+          application={getApplication(selectedRole.id)}
           onClose={() => setSelectedRole(null)}
           onNext={(role) => {
             setSelectedRole(null)
             setApplyModalRole(role)
+          }}
+          onViewApplication={(app) => {
+            setSelectedRole(null)
+            setViewingApplication(app)
           }}
         />
       )}
@@ -93,19 +117,58 @@ const Opportunities = () => {
           roleId={applyModalRole.id}
           jobTitle={applyModalRole.title}
           onClose={() => setApplyModalRole(null)}
+          onSuccess={(roleId, formData) => {
+            try {
+              // Store ID in set (legacy support)
+              const rawIds = localStorage.getItem('recruitment_applied_role_ids')
+              const arr = rawIds ? (JSON.parse(rawIds) as string[]) : []
+              const set = new Set(Array.isArray(arr) ? arr : [])
+              set.add(applyModalRole.id)
+              localStorage.setItem('recruitment_applied_role_ids', JSON.stringify([...set]))
+
+              // Store full application details
+              if (formData) {
+                const rawApps = localStorage.getItem('recruitment_applications')
+                const apps = rawApps ? JSON.parse(rawApps) : {}
+                apps[roleId] = {
+                  id: Math.random().toString(36).substring(7), // Generate a fake ID for display
+                  status: 'Pending',
+                  dateApplied: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                  company: 'Cbrilliance', // Hardcoded for this demo flow
+                  role: formData.role,
+                  ...formData
+                }
+                localStorage.setItem('recruitment_applications', JSON.stringify(apps))
+              }
+            } catch {
+              // ignore
+            }
+          }}
           submissionDisabled={!applyModalRole.id.match(/^[a-f0-9]{24}$/i) ? 'Connect the backend and use roles from Cbrilliance or Afresh to submit an application.' : undefined}
+        />
+      )}
+      {viewingApplication && (
+        <ApplicationDetailModal
+          application={viewingApplication}
+          onClose={() => setViewingApplication(null)}
+          readonly={true}
         />
       )}
       <main id="main" className="opportunities-main" tabIndex={-1}>
         <div className="trending-badge">Trending Opportunities</div>
         <h1 className="page-title">Available Roles</h1>
-        
+
         <div className="jobs-grid">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} onApplyClick={handleApplyClick} />
+            <JobCard
+              key={job.id}
+              job={job}
+              onApplyClick={handleApplyClick}
+              isApplied={!!getApplication(job.id)}
+            />
           ))}
         </div>
-        
+
         <Link to="/browse-jobs" className="view-more-button">
           View More Roles <ArrowRight className="arrow-icon" size={20} />
         </Link>

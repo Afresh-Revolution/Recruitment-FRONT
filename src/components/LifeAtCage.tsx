@@ -19,7 +19,19 @@ const DEFAULT_IMAGES = [
   { id: 6, src: filmconvert, alt: 'Team working' },
 ]
 
-const imagesPerView = 3
+const GAP_REM = 1.25
+
+function getImagesPerView(): number {
+  if (typeof window === 'undefined') return 3
+  const w = window.innerWidth
+  if (w <= 480) return 1
+  if (w <= 768) return 2
+  return 3
+}
+
+function getSlideWidthPercent(perView: number): number {
+  return 100 / perView
+}
 
 const LifeAtCage = () => {
   const [categoryTag, setCategoryTag] = useState('Life at Cage')
@@ -29,6 +41,13 @@ const LifeAtCage = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [transitionEnabled, setTransitionEnabled] = useState(true)
+  const [imagesPerView, setImagesPerView] = useState(getImagesPerView)
+
+  useEffect(() => {
+    const onResize = () => setImagesPerView(getImagesPerView())
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     getGallery().then((data) => {
@@ -49,12 +68,15 @@ const LifeAtCage = () => {
     })
   }, [])
 
-  const slides = useMemo(
-    () => (images.length >= 3 ? [...images, images[0], images[1], images[2]] : images),
-    [images]
-  )
-  const maxIndex = Math.max(0, slides.length - imagesPerView)
+  const slides = useMemo(() => {
+    if (images.length < imagesPerView) return images
+    const cloneCount = imagesPerView
+    return [...images, ...images.slice(0, cloneCount)]
+  }, [images, imagesPerView])
+  const maxIndex = Math.max(0, images.length - imagesPerView)
   const dotCount = Math.min(6, images.length) || 6
+  const slideWidthPercent = getSlideWidthPercent(imagesPerView)
+  const transformValue = `translateX(calc(-${currentIndex} * (${slideWidthPercent}% + ${GAP_REM}rem)))`
 
   const advance = useCallback(() => {
     setCurrentIndex((prev) => {
@@ -124,7 +146,7 @@ const LifeAtCage = () => {
             <div
               className="gallery-track"
               style={{
-                transform: `translateX(calc(-${currentIndex} * (33.333% + 1.25rem)))`,
+                transform: transformValue,
                 transition: transitionEnabled ? 'transform 0.6s ease' : 'none',
               }}
             >

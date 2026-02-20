@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import type { RoleDetail } from '../api/types'
+import type { ApplicationDetail } from './ApplicationDetailModal'
 
 export type { RoleDetail } from '../api/types'
 
@@ -9,6 +10,11 @@ interface JobDetailModalProps {
   role: RoleDetail
   onClose: () => void
   onNext?: (role: RoleDetail) => void
+  /** When true, show "Applied" and do not open apply flow. */
+  applied?: boolean
+  /** If provided, displays "View Application" instead of just "Applied" */
+  application?: ApplicationDetail | null
+  onViewApplication?: (app: ApplicationDetail) => void
 }
 
 const DEFAULT_DESCRIPTION =
@@ -30,9 +36,10 @@ const DEFAULT_QUALIFICATIONS = [
   'Others with relevant interest or experience',
 ]
 
-const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
+const JobDetailModal = ({ role, onClose, onNext, applied, application, onViewApplication }: JobDetailModalProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousActiveRef = useRef<HTMLElement | null>(null)
+  const handleCloseRef = useRef<() => void>(() => { })
 
   const description = role.description ?? DEFAULT_DESCRIPTION
   const requirements = role.requirements ?? DEFAULT_REQUIREMENTS
@@ -40,6 +47,12 @@ const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
   const qualifications = role.qualifications ?? DEFAULT_QUALIFICATIONS
   const duration = role.jobType
   const applicationDeadline = role.applicationDeadline ?? `${role.deadline}, 2026`
+
+  const handleClose = () => {
+    previousActiveRef.current?.focus()
+    onClose()
+  }
+  handleCloseRef.current = handleClose
 
   useEffect(() => {
     previousActiveRef.current = document.activeElement as HTMLElement | null
@@ -49,10 +62,13 @@ const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
     }
   }, [])
 
-  const handleClose = () => {
-    previousActiveRef.current?.focus()
-    onClose()
-  }
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCloseRef.current()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) handleClose()
@@ -113,13 +129,29 @@ const JobDetailModal = ({ role, onClose, onNext }: JobDetailModalProps) => {
           </div>
 
           <div className="job-detail-footer">
-            <button
-              type="button"
-              className="job-detail-next"
-              onClick={() => (onNext ? onNext(role) : handleClose())}
-            >
-              Next
-            </button>
+            {applied || application ? (
+              application && onViewApplication ? (
+                <button
+                  type="button"
+                  className="job-detail-next job-detail-next--view"
+                  onClick={() => onViewApplication(application)}
+                >
+                  View Application
+                </button>
+              ) : (
+                <span className="job-detail-next job-detail-next--applied" aria-label="Already applied">
+                  Applied
+                </span>
+              )
+            ) : (
+              <button
+                type="button"
+                className="job-detail-next"
+                onClick={() => (onNext ? onNext(role) : handleClose())}
+              >
+                Next
+              </button>
+            )}
           </div>
         </div>
       </div>

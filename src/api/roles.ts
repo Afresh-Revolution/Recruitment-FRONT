@@ -8,6 +8,9 @@ const MOCK_BY_PARTNER: Record<string, RoleDetail[]> = {
   cbrilliance: MOCK_CBRILLIANCE_ROLES,
 }
 
+/** Backend company ObjectId for Afresh (roles API and apply use this). Cbrilliance uses its own from destination. */
+export const AFRESH_COMPANY_OBJECT_ID = '69808570b01ffe332df8e117'
+
 interface RoleSectionResponse {
   companyName?: string
   companyLogo?: string
@@ -36,8 +39,9 @@ export async function getRoles(companyId: string): Promise<RoleDetail[]> {
   if (!hasBackend()) {
     return MOCK_BY_PARTNER[companyId] ?? []
   }
+  const queryId = companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : companyId
   try {
-    const data = await apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(companyId)}`)
+    const data = await apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(queryId)}`)
     return (data.roles ?? []).map(mapBackendRoleToDetail)
   } catch {
     // When backend is configured, don't return mock roles (they have non-ObjectId ids and submit will fail)
@@ -50,5 +54,6 @@ export async function getRolesSection(companyId: string): Promise<RoleSectionRes
   if (!hasBackend()) {
     return { roles: [], filterCategories: ['All', 'Engineering', 'Design', 'Product', 'Marketing'] }
   }
-  return apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(companyId)}`)
+  const queryId = companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : companyId
+  return apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(queryId)}`)
 }
