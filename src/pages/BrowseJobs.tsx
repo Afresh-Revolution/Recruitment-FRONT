@@ -121,11 +121,12 @@ const BrowseJobs = () => {
                     <h2 className="browse-jobs-card-name">{partner.name}</h2>
                     <p className="browse-jobs-card-tagline">{partner.tagline}</p>
                     <p className="browse-jobs-card-description">{partner.description}</p>
+                    <hr />
                     <div className="browse-jobs-card-positions">
-                      <span className="browse-jobs-positions-label">Available Position</span>
-                      <span className="browse-jobs-positions-count">
+                      <div className="browse-jobs-positions-label">Available Positions</div>
+                      <div className="browse-jobs-positions-count">
                         <span className="browse-jobs-dot" /> {openRoleCounts[partner.id] ?? partner.openRoles} Open Roles
-                      </span>
+                      </div>
                     </div>
                     <Link
                       to={partner.selectLink ?? (partner.id === 'afresh' ? '/afresh-roles' : partner.id === 'cbrilliance' ? '/cbrilliance-roles' : '/opportunities')}

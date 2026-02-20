@@ -671,6 +671,13 @@ body {
   flex: 1;
 }
 
+.browse-jobs-card-content hr {
+  height: 0.5px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.5rem 0;
+}
+
 .browse-jobs-card-name {
   font-size: 1.5rem;
   font-weight: 700;
@@ -696,9 +703,9 @@ body {
 
 .browse-jobs-card-positions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
   margin-top: 0.25rem;
 }
 
@@ -717,6 +724,7 @@ body {
 }
 
 .browse-jobs-dot {
+  display: inline-block;
   width: 6px;
   height: 6px;
   border-radius: 50%;
