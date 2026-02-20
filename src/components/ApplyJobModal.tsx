@@ -27,7 +27,7 @@ interface ApplyJobModalProps {
   jobTitle: string
   onClose: () => void
   /** Called when user dismisses the success overlay (so parent can mark this role as Applied). */
-  onSuccess?: (roleId: string) => void
+  onSuccess?: (roleId: string, formData?: any) => void
   /** When set, a notice is shown and the submit button is disabled (e.g. for preview/mock roles). */
   submissionDisabled?: string
 }
@@ -60,7 +60,7 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
   const [submitError, setSubmitError] = useState<string | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousActiveRef = useRef<HTMLElement | null>(null)
-  const handleCloseRef = useRef<() => void>(() => {})
+  const handleCloseRef = useRef<() => void>(() => { })
 
   const handleClose = () => {
     previousActiveRef.current?.focus()
@@ -175,10 +175,24 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
   }
 
   const handleSuccessClose = useCallback(() => {
-    onSuccess?.(roleId)
+    // Construct application details from form state
+    const applicationData = {
+      applicantName: fullName,
+      email,
+      phone,
+      address,
+      educationStatus: education.join(', '),
+      role: jobTitle, // Using jobTitle as the applied role name
+      motivation,
+      attachmentName: file?.name,
+      // attachmentUrl is not available since we don't get it back from backend, 
+      // but we can mark it as "submitted"
+    }
+
+    onSuccess?.(roleId, applicationData) // Pass data back
     setShowSuccess(false)
     onClose()
-  }, [roleId, onSuccess, onClose])
+  }, [roleId, onSuccess, onClose, fullName, email, phone, address, education, jobTitle, motivation, file])
 
   const successCloseRef = useRef(handleSuccessClose)
   successCloseRef.current = handleSuccessClose

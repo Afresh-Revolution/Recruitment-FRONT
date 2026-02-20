@@ -32,6 +32,8 @@ interface ApplicationDetailModalProps {
   onClearError?: () => void
   /** When provided, used for Download so auth (e.g. Bearer) can be sent. Otherwise plain link. */
   onDownloadResume?: (url: string, filename: string) => void | Promise<void>
+  /** If true, hides admin controls (status change, mark reviewed). */
+  readonly?: boolean
 }
 
 export default function ApplicationDetailModal({
@@ -44,6 +46,7 @@ export default function ApplicationDetailModal({
   statusError = null,
   onClearError,
   onDownloadResume,
+  readonly = false,
 }: ApplicationDetailModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<ApplicationStatus>(application?.status ?? 'Pending')
   const [statusMessage, setStatusMessage] = useState('')
@@ -117,7 +120,7 @@ export default function ApplicationDetailModal({
                   <span className="app-detail-date">{application.dateApplied}</span>
                 </div>
               </div>
-              {onStatusChange && (
+              {!readonly && onStatusChange && (
                 <div className="app-detail-next-step">
                   <span className="app-detail-next-step-label">Next step</span>
                   <div className="app-detail-next-step-row">
@@ -311,7 +314,7 @@ export default function ApplicationDetailModal({
           <button type="button" className="app-detail-btn app-detail-btn--secondary" onClick={onClose}>
             Close
           </button>
-          {onMarkReviewed && (
+          {onMarkReviewed && !readonly && (
             <button
               type="button"
               className="app-detail-btn app-detail-btn--primary"
