@@ -18,9 +18,10 @@ export interface Job {
 interface JobCardProps {
   job: Job
   onApplyClick?: (job: Job) => void
+  isApplied?: boolean
 }
 
-const JobCard = ({ job, onApplyClick }: JobCardProps) => {
+const JobCard = ({ job, onApplyClick, isApplied }: JobCardProps) => {
   const logo = job.companyLogo ?? cbrillianceLogo
   return (
     <div className="job-card">
@@ -39,18 +40,18 @@ const JobCard = ({ job, onApplyClick }: JobCardProps) => {
         </div>
         <span className="job-type-badge">{job.jobType}</span>
       </div>
-      
+
       <h3 className="job-title">
         {job.title}
       </h3>
-      
+
       <div className="job-category">
         <Briefcase className="category-icon" size={16} />
         <span>{job.department}</span>
       </div>
-      
+
       <div className="job-divider"></div>
-      
+
       <div className="job-card-footer">
         <div className="job-deadline">
           <Clock className="deadline-icon" size={16} />
@@ -58,13 +59,13 @@ const JobCard = ({ job, onApplyClick }: JobCardProps) => {
         </div>
         <button
           type="button"
-          className="apply-button"
+          className={`apply-button ${isApplied ? 'apply-button--view' : ''}`}
           onClick={(e) => {
             e.stopPropagation()
             onApplyClick?.(job)
           }}
         >
-          Apply Now
+          {isApplied ? 'View Application' : 'Apply Now'}
         </button>
       </div>
     </div>

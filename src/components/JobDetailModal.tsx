@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import type { RoleDetail } from '../api/types'
+import type { ApplicationDetail } from './ApplicationDetailModal'
 
 export type { RoleDetail } from '../api/types'
 
@@ -11,6 +12,9 @@ interface JobDetailModalProps {
   onNext?: (role: RoleDetail) => void
   /** When true, show "Applied" and do not open apply flow. */
   applied?: boolean
+  /** If provided, displays "View Application" instead of just "Applied" */
+  application?: ApplicationDetail | null
+  onViewApplication?: (app: ApplicationDetail) => void
 }
 
 const DEFAULT_DESCRIPTION =
@@ -32,10 +36,10 @@ const DEFAULT_QUALIFICATIONS = [
   'Others with relevant interest or experience',
 ]
 
-const JobDetailModal = ({ role, onClose, onNext, applied }: JobDetailModalProps) => {
+const JobDetailModal = ({ role, onClose, onNext, applied, application, onViewApplication }: JobDetailModalProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousActiveRef = useRef<HTMLElement | null>(null)
-  const handleCloseRef = useRef<() => void>(() => {})
+  const handleCloseRef = useRef<() => void>(() => { })
 
   const description = role.description ?? DEFAULT_DESCRIPTION
   const requirements = role.requirements ?? DEFAULT_REQUIREMENTS
@@ -125,10 +129,20 @@ const JobDetailModal = ({ role, onClose, onNext, applied }: JobDetailModalProps)
           </div>
 
           <div className="job-detail-footer">
-            {applied ? (
-              <span className="job-detail-next job-detail-next--applied" aria-label="Already applied">
-                Applied
-              </span>
+            {applied || application ? (
+              application && onViewApplication ? (
+                <button
+                  type="button"
+                  className="job-detail-next job-detail-next--view"
+                  onClick={() => onViewApplication(application)}
+                >
+                  View Application
+                </button>
+              ) : (
+                <span className="job-detail-next job-detail-next--applied" aria-label="Already applied">
+                  Applied
+                </span>
+              )
             ) : (
               <button
                 type="button"
