@@ -131,7 +131,7 @@ const BrowseJobs = () => {
                             <span className="browse-jobs-dot" /> {count} Open Roles
                           </div>
                         ) : null
-                      })()
+                      })()}
                     </div>
                     <Link
                       to={partner.selectLink ?? (partner.id === 'afresh' ? '/afresh-roles' : partner.id === 'cbrilliance' ? '/cbrilliance-roles' : '/opportunities')}
