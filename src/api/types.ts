@@ -31,6 +31,8 @@ export interface ApplicationPayload {
   email: string
   phone: string
   address: string
+  state: string
+  localGovernment: string
   education: string[]
   role: string
   workingDaysTime: string

@@ -6,6 +6,26 @@ import { getCompanyObjectId } from '../api/destination'
 
 const EDUCATION_OPTIONS = ['Student', 'Graduate', 'NYSC', 'Unemployed', 'Others']
 
+const PLATEAU_LGAS = [
+  'Barkin Ladi',
+  'Bassa',
+  'Bokkos',
+  'Jos East',
+  'Jos North',
+  'Jos South',
+  'Kanam',
+  'Kanke',
+  'Langtang North',
+  'Langtang South',
+  'Mangu',
+  'Mikang',
+  'Pankshin',
+  "Qua'an Pan",
+  'Riyom',
+  'Shendam',
+  'Wase',
+]
+
 const WORKING_DAYS = [
   'Mondays: 10am - 5pm',
   'Wednesday: 10am - 5pm',
@@ -37,6 +57,7 @@ interface FormErrors {
   email?: string
   phone?: string
   address?: string
+  localGovernment?: string
   education?: string
   role?: string
   motivation?: string
@@ -48,6 +69,7 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [localGovernment, setLocalGovernment] = useState('')
   const [education, setEducation] = useState<string[]>([])
   const [role, setRole] = useState('')
   const [motivation, setMotivation] = useState('')
@@ -99,11 +121,12 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
     if (!phone.trim()) err.phone = 'Phone number is required'
     else if (!PHONE_REGEX.test(phone.replace(/\s/g, ''))) err.phone = 'Enter a valid phone number'
     if (!address.trim()) err.address = 'Current address is required'
+    if (!localGovernment) err.localGovernment = 'Please select your local government'
     if (education.length === 0) err.education = 'Select at least one option'
     if (!role || role === '') err.role = 'Please select a role'
     if (!motivation.trim()) err.motivation = 'Please tell us why you want to work with us'
     return err
-  }, [fullName, email, phone, address, education, role, motivation])
+  }, [fullName, email, phone, address, localGovernment, education, role, motivation])
 
   const validateFile = (f: File | null): string | null => {
     if (!f) return null
@@ -155,6 +178,8 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim(),
+        state: 'Plateau State',
+        localGovernment,
         education,
         role,
         workingDaysTime: WORKING_DAYS_STRING,
@@ -181,11 +206,13 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
       email,
       phone,
       address,
+      state: 'Plateau State',
+      localGovernment,
       educationStatus: education.join(', '),
       role: jobTitle, // Using jobTitle as the applied role name
       motivation,
       attachmentName: file?.name,
-      // attachmentUrl is not available since we don't get it back from backend, 
+      // attachmentUrl is not available since we don't get it back from backend,
       // but we can mark it as "submitted"
     }
 
@@ -284,7 +311,7 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
                 )}
               </div>
               <div className="apply-job-field-wrap">
-                <label htmlFor="apply-address">Current Address (City/State)</label>
+                <label htmlFor="apply-address">Current Address</label>
                 <input
                   id="apply-address"
                   type="text"
@@ -292,12 +319,43 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   onBlur={() => setTouched((p) => ({ ...p, address: true }))}
-                  placeholder="Current Address (City/State)"
+                  placeholder="Street / Area"
                   aria-required
                   aria-invalid={!!showError('address')}
                 />
                 {showError('address') && (
                   <span className="apply-job-error" role="alert">{errors.address}</span>
+                )}
+              </div>
+              <div className="apply-job-field-wrap">
+                <label htmlFor="apply-state">State</label>
+                <input
+                  id="apply-state"
+                  type="text"
+                  className="apply-job-input apply-job-input--readonly"
+                  value="Plateau State"
+                  readOnly
+                  aria-readonly="true"
+                />
+              </div>
+              <div className="apply-job-field-wrap">
+                <label htmlFor="apply-lga">Local Government Area</label>
+                <select
+                  id="apply-lga"
+                  className={`apply-job-select ${showError('localGovernment') ? 'apply-job-input--error' : ''}`}
+                  value={localGovernment}
+                  onChange={(e) => setLocalGovernment(e.target.value)}
+                  onBlur={() => setTouched((p) => ({ ...p, localGovernment: true }))}
+                  aria-required
+                  aria-invalid={!!showError('localGovernment')}
+                >
+                  <option value="">Select Local Government</option>
+                  {PLATEAU_LGAS.map((lga) => (
+                    <option key={lga} value={lga}>{lga}</option>
+                  ))}
+                </select>
+                {showError('localGovernment') && (
+                  <span className="apply-job-error" role="alert">{errors.localGovernment}</span>
                 )}
               </div>
             </div>

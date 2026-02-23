@@ -48,7 +48,7 @@ const BrowseJobs = () => {
             setOpenRoleCounts((prev) => ({ ...prev, [partner.id]: roles.length }))
           }
         })
-        .catch(() => {})
+        .catch(() => { })
     })
     return () => { cancelled = true }
   }, [partners])
@@ -123,9 +123,14 @@ const BrowseJobs = () => {
                     <p className="browse-jobs-card-description">{partner.description}</p>
                     <div className="browse-jobs-card-positions">
                       <span className="browse-jobs-positions-label">Available Position</span>
-                      <span className="browse-jobs-positions-count">
-                        <span className="browse-jobs-dot" /> {openRoleCounts[partner.id] ?? partner.openRoles} Open Roles
-                      </span>
+                      {(() => {
+                        const count = openRoleCounts[partner.id] ?? partner.openRoles
+                        return count > 0 ? (
+                          <span className="browse-jobs-positions-count">
+                            <span className="browse-jobs-dot" /> {count} Open Roles
+                          </span>
+                        ) : null
+                      })()}
                     </div>
                     <Link
                       to={partner.selectLink ?? (partner.id === 'afresh' ? '/afresh-roles' : partner.id === 'cbrilliance' ? '/cbrilliance-roles' : '/opportunities')}

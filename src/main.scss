@@ -1278,6 +1278,13 @@ body {
   appearance: auto;
 }
 
+.apply-job-input--readonly {
+  background: #ececec;
+  color: #666;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
 .apply-job-textarea {
   resize: vertical;
   min-height: 100px;

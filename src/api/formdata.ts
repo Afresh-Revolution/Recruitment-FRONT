@@ -29,6 +29,8 @@ export async function submitApplication(payload: ApplicationPayload): Promise<Su
     formData.append('email', payload.email)
     formData.append('phone', payload.phone)
     formData.append('address', payload.address)
+    formData.append('state', payload.state)
+    formData.append('localGovernment', payload.localGovernment)
     formData.append('educationStatus', payload.education.length ? payload.education.join(', ') : '')
     formData.append('role', payload.role)
     formData.append('workingDaysTime', payload.workingDaysTime)
@@ -66,6 +68,8 @@ export async function submitApplication(payload: ApplicationPayload): Promise<Su
       email: payload.email,
       phone: payload.phone,
       address: payload.address,
+      state: payload.state,
+      localGovernment: payload.localGovernment,
       educationStatus: payload.education.length ? payload.education.join(', ') : '',
       role: payload.role,
       workingDaysTime: payload.workingDaysTime,

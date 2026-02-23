@@ -34,7 +34,7 @@ function getSlideWidthPercent(perView: number): number {
 }
 
 const LifeAtCage = () => {
-  const [categoryTag, setCategoryTag] = useState('Life at Cage')
+  const [categoryTag, setCategoryTag] = useState('Life at Jobfinix')
   const [title, setTitle] = useState('Our Gallery')
   const [subtitle, setSubtitle] = useState('A glimpse into our community and culture.')
   const [images, setImages] = useState<Array<{ id: number; src: string; alt: string }>>(DEFAULT_IMAGES)
