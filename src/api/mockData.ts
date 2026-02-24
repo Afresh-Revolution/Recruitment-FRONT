@@ -22,6 +22,7 @@ export const MOCK_PARTNERS: PartnerCompany[] = [
     openRoles: 8,
     selectLink: '/afresh-roles',
   },
+
 ]
 
 export const MOCK_AFRESH_ROLES: RoleDetail[] = [

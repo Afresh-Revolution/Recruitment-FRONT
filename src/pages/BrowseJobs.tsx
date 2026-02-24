@@ -18,6 +18,8 @@ const BrowseJobs = () => {
   const [error, setError] = useState<string | null>(null)
   /** Actual role count per partner id (from roles API); used so "X Open Roles" matches backend. */
   const [openRoleCounts, setOpenRoleCounts] = useState<Record<string, number>>({})
+  /** Tracks which partner ids have finished loading their role counts */
+  const [roleCountsLoaded, setRoleCountsLoaded] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     let cancelled = false
@@ -45,13 +47,18 @@ const BrowseJobs = () => {
         .then((companyId) => getRoles(companyId ?? partner.id))
         .then((roles) => {
           if (!cancelled) {
-            setOpenRoleCounts((prev) => ({ ...prev, [partner.id]: roles.length }))
+            const activeCount = roles.filter((r) => r.isActive !== false).length
+            setOpenRoleCounts((prev) => ({ ...prev, [partner.id]: activeCount }))
+            setRoleCountsLoaded((prev) => ({ ...prev, [partner.id]: true }))
           }
         })
-        .catch(() => {})
+        .catch(() => {
+          if (!cancelled) setRoleCountsLoaded((prev) => ({ ...prev, [partner.id]: true }))
+        })
     })
     return () => { cancelled = true }
   }, [partners])
+
 
   const getLogoUrl = (partner: PartnerCompany) => {
     if (partner.id === 'cbrilliance') return cbrillianceLogo
@@ -121,11 +128,20 @@ const BrowseJobs = () => {
                     <h2 className="browse-jobs-card-name">{partner.name}</h2>
                     <p className="browse-jobs-card-tagline">{partner.tagline}</p>
                     <p className="browse-jobs-card-description">{partner.description}</p>
+                    <hr />
                     <div className="browse-jobs-card-positions">
-                      <span className="browse-jobs-positions-label">Available Position</span>
-                      <span className="browse-jobs-positions-count">
-                        <span className="browse-jobs-dot" /> {openRoleCounts[partner.id] ?? partner.openRoles} Open Roles
-                      </span>
+                      <div className="browse-jobs-positions-label">Available Positions</div>
+                      {roleCountsLoaded[partner.id] ? (
+                        openRoleCounts[partner.id] > 0 ? (
+                          <div className="browse-jobs-positions-count">
+                            <span className="browse-jobs-dot" /> {openRoleCounts[partner.id]} Open Roles
+                          </div>
+                        ) : null
+                      ) : (
+                        <div className="browse-jobs-positions-count browse-jobs-positions-count--loading">
+                          Loading…
+                        </div>
+                      )}
                     </div>
                     <Link
                       to={partner.selectLink ?? (partner.id === 'afresh' ? '/afresh-roles' : partner.id === 'cbrilliance' ? '/cbrilliance-roles' : '/opportunities')}

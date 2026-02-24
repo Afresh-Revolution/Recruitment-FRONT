@@ -11,19 +11,19 @@ import NotFound from './pages/NotFound'
 import ErrorBoundary from './components/ErrorBoundary'
 
 const PAGE_TITLES: Record<string, string> = {
-  '/': 'Home | C.A.G.E',
-  '/chooseus': 'Choose Us | C.A.G.E',
-  '/browse-jobs': 'Browse Jobs | C.A.G.E',
-  '/afresh-roles': 'AfrESH Roles | C.A.G.E',
-  '/cbrilliance-roles': 'Cbrilliance Roles | C.A.G.E',
-  '/opportunities': 'Opportunities | C.A.G.E',
-  '/admin': 'Admin | C.A.G.E',
+  '/': 'Home | Jobfinix',
+  '/chooseus': 'Choose Us | Jobfinix',
+  '/browse-jobs': 'Browse Jobs | Jobfinix',
+  '/afresh-roles': 'AfrESH Roles | Jobfinix',
+  '/cbrilliance-roles': 'Cbrilliance Roles | Jobfinix',
+  '/opportunities': 'Opportunities | Jobfinix',
+  '/admin': 'Admin | Jobfinix',
 }
 
 function DocumentTitle() {
   const { pathname } = useLocation()
   useEffect(() => {
-    document.title = PAGE_TITLES[pathname] ?? 'C.A.G.E'
+    document.title = PAGE_TITLES[pathname] ?? 'Jobfinix'
   }, [pathname])
   return null
 }

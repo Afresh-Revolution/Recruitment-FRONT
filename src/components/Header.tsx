@@ -13,8 +13,8 @@ const Header = () => {
         Skip to main content
       </a>
       <div className="header-container">
-        <Link to="/" className="logo" aria-label="C.A.G.E Home">
-          <span className="logo-text">C.A.G.E</span>
+        <Link to="/" className="logo" aria-label="Jobfinix Home">
+          <span className="logo-text">JOBFINIX</span>
         </Link>
         <nav className="nav" aria-label="Main">
           <Link

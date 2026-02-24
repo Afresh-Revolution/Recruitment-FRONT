@@ -28,6 +28,7 @@ function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
     jobType: r.type,
     location: r.location,
     deadline,
+    isActive: r.isActive,
     applicationDeadline: r.applyByLabel,
     description: r.description,
     requirements: r.requirements,

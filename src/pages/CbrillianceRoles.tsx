@@ -44,6 +44,8 @@ const CbrillianceRoles = () => {
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
   const [viewingApplication, setViewingApplication] = useState<ApplicationDetail | null>(null)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 8
 
   useEffect(() => {
     let cancelled = false
@@ -87,7 +89,9 @@ const CbrillianceRoles = () => {
   }, [roles])
 
   const filteredRoles = useMemo(() => {
-    let list = activeFilter === 'All' ? roles : roles.filter((role) => role.department === activeFilter)
+    // Hide inactive roles on public pages
+    let list = roles.filter((r) => r.isActive !== false)
+    list = activeFilter === 'All' ? list : list.filter((role) => role.department === activeFilter)
     const q = searchQuery.trim().toLowerCase()
     if (q) {
       list = list.filter(
@@ -98,6 +102,12 @@ const CbrillianceRoles = () => {
     }
     return list
   }, [roles, activeFilter, searchQuery])
+
+  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / PAGE_SIZE))
+  const pagedRoles = filteredRoles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  const handleFilterChange = (f: string) => { setActiveFilter(f); setPage(1) }
+  const handleSearch = (q: string) => { setSearchQuery(q); setPage(1) }
 
   const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : null)
 
@@ -199,9 +209,17 @@ const CbrillianceRoles = () => {
         {loading ? (
           <p className="roles-loading">Loading…</p>
         ) : filteredRoles.length === 0 ? (
-          <p className="roles-empty">
-            {searchQuery.trim() ? 'No roles match your search or filters.' : 'No roles match your filters.'}
-          </p>
+          <div className="roles-coming-soon">
+            {searchQuery.trim() || activeFilter !== 'All' ? (
+              <p className="roles-empty">No roles match your search or filters.</p>
+            ) : (
+              <>
+                <span className="roles-coming-soon-icon" aria-hidden>🚀</span>
+                <h2 className="roles-coming-soon-title">Coming Soon</h2>
+                <p className="roles-coming-soon-text">No open positions right now — check back soon!</p>
+              </>
+            )}
+          </div>
         ) : (
           <>
             <div className="roles-search-row">
@@ -211,7 +229,7 @@ const CbrillianceRoles = () => {
                 placeholder="Search for roles..."
                 aria-label="Search for roles"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
               <div className="roles-filters">
                 {filters.map((filter) => (
@@ -219,7 +237,7 @@ const CbrillianceRoles = () => {
                     key={filter}
                     type="button"
                     className={`roles-filter-btn ${activeFilter === filter ? 'roles-filter-btn--active' : ''}`}
-                    onClick={() => setActiveFilter(filter)}
+                    onClick={() => handleFilterChange(filter)}
                   >
                     {filter}
                   </button>
@@ -228,7 +246,7 @@ const CbrillianceRoles = () => {
             </div>
 
             <ul className="roles-list">
-              {filteredRoles.map((role) => (
+              {pagedRoles.map((role) => (
                 <li
                   key={role.id}
                   className="roles-card"
@@ -279,7 +297,7 @@ const CbrillianceRoles = () => {
                       className="roles-apply-btn"
                       onClick={(e) => {
                         e.stopPropagation()
-                        openApplyModal(role)
+                        setSelectedRole(role)
                       }}
                     >
                       Apply Now
@@ -288,6 +306,29 @@ const CbrillianceRoles = () => {
                 </li>
               ))}
             </ul>
+            {totalPages > 1 && (
+              <div className="roles-pagination">
+                <button
+                  type="button"
+                  className="roles-page-btn"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Previous page"
+                >
+                  ← Prev
+                </button>
+                <span className="roles-page-info">{page} / {totalPages}</span>
+                <button
+                  type="button"
+                  className="roles-page-btn"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  aria-label="Next page"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>

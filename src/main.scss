@@ -232,6 +232,51 @@ body {
   &:hover .job-title {
     color: #f97316;
   }
+
+  &--coming-soon {
+    border-color: rgba(251, 146, 60, 0.25);
+    cursor: default;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: rgba(251, 146, 60, 0.35);
+    }
+  }
+}
+
+.job-coming-soon-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem 1rem 0.5rem;
+  flex: 1;
+}
+
+.job-coming-soon-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  animation: roles-float 3s ease-in-out infinite;
+}
+
+.job-coming-soon-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.job-coming-soon-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  line-height: 1.5;
 }
 
 .job-card-header {
@@ -262,6 +307,34 @@ body {
   object-fit: cover;
   object-position: center;
   display: block;
+}
+
+.company-logo-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.job-featured-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .company-info {
@@ -673,6 +746,13 @@ body {
   flex: 1;
 }
 
+.browse-jobs-card-content hr {
+  height: 0.5px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.5rem 0;
+}
+
 .browse-jobs-card-name {
   font-size: 1.5rem;
   font-weight: 700;
@@ -698,9 +778,9 @@ body {
 
 .browse-jobs-card-positions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
   margin-top: 0.25rem;
 }
 
@@ -719,11 +799,18 @@ body {
 }
 
 .browse-jobs-dot {
+  display: inline-block;
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #22c55e;
   flex-shrink: 0;
+}
+
+.browse-jobs-positions-count--loading {
+  color: rgba(255, 255, 255, 0.35);
+  font-style: italic;
+  font-size: 0.82rem;
 }
 
 .browse-jobs-select-btn {
@@ -829,6 +916,53 @@ body {
   margin: 2rem 0;
 }
 
+.roles-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+}
+
+.roles-coming-soon-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.25rem;
+  display: block;
+  animation: roles-float 3s ease-in-out infinite;
+}
+
+@keyframes roles-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.roles-coming-soon-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.75rem;
+  background: linear-gradient(135deg, #60a5fa, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.roles-coming-soon-text {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
 .roles-search-row {
   display: flex;
   flex-wrap: wrap;
@@ -892,6 +1026,42 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.roles-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.roles-page-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.roles-page-info {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  min-width: 4rem;
+  text-align: center;
 }
 
 .roles-card {
@@ -1276,6 +1446,13 @@ body {
 .apply-job-select {
   cursor: pointer;
   appearance: auto;
+}
+
+.apply-job-input--readonly {
+  background: #ececec;
+  color: #666;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
 }
 
 .apply-job-textarea {
@@ -4525,5 +4702,402 @@ body {
   &:hover {
     background: rgba(96, 165, 250, 0.35);
     color: #ffffff;
+  }
+}
+
+// ─── Admin: Tab Switcher ────────────────────────────────────────────────────
+.admin-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin: 1.5rem 0 1.25rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0;
+}
+
+.admin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &--active {
+    color: #60a5fa;
+    border-bottom-color: #60a5fa;
+    font-weight: 600;
+
+    &:hover {
+      color: #60a5fa;
+      background: rgba(96, 165, 250, 0.07);
+    }
+  }
+}
+
+// ─── Admin: Job Roles stats card variant ───────────────────────────────────
+.admin-card--roles {
+  border-left-color: #a78bfa;
+
+  .admin-card-value {
+    color: #a78bfa;
+  }
+}
+
+// ─── Admin: Job Roles Panel ─────────────────────────────────────────────────
+.admin-jr-panel {
+  animation: fade-in-up 0.2s ease;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-jr-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.admin-jr-hint {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.admin-jr-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.18s;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.admin-jr-error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.admin-jr-table {
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+  .admin-jr-title-cell {
+    white-space: normal;
+    min-width: 160px;
+    font-weight: 500;
+  }
+}
+
+.admin-jr-status-pill {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+
+  &--active {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+  }
+
+  &--inactive {
+    background: rgba(156, 163, 175, 0.12);
+    color: #9ca3af;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+  }
+}
+
+.admin-action-btn--edit {
+  color: #93c5fd;
+
+  &:hover {
+    background: rgba(96, 165, 250, 0.12);
+    color: #60a5fa;
+  }
+}
+
+.admin-action-btn--delete {
+  color: #fca5a5;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+  }
+}
+
+.admin-jr-delete-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.admin-action-btn--confirm-yes {
+  color: #34d399;
+
+  &:hover {
+    background: rgba(52, 211, 153, 0.1);
+  }
+}
+
+.admin-action-btn--confirm-no {
+  color: #9ca3af;
+
+  &:hover {
+    background: rgba(156, 163, 175, 0.1);
+  }
+}
+
+// ─── Admin: Job Role Form Modal ──────────────────────────────────────────────
+.admin-jr-form-modal {
+  background: #12172e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  animation: modal-slide-in 0.2s ease;
+}
+
+@keyframes modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-jr-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.admin-jr-form-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.admin-jr-form-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.admin-jr-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-jr-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-jr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  &--inline {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.admin-jr-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-jr-required {
+  color: #f87171;
+  margin-left: 2px;
+}
+
+.admin-jr-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  padding: 0.6rem 0.9rem;
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+  }
+
+  &:focus {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.06);
+  }
+
+  option {
+    background: #1a1f3a;
+    color: #fff;
+  }
+}
+
+.admin-jr-textarea {
+  @extend .admin-jr-input;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.admin-jr-hint-text {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.admin-jr-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #60a5fa;
+  cursor: pointer;
+}
+
+.admin-jr-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.admin-jr-cancel-btn {
+  padding: 0.6rem 1.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.admin-jr-submit-btn {
+  padding: 0.6rem 1.5rem;
+  background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 }

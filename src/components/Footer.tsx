@@ -8,7 +8,7 @@ const Footer = () => {
           <Link to="/admin" className="footer-admin-link" aria-label="Admin">
             ⓒ
           </Link>
-          {' 2026 Cage All rights reserved.'}
+          {' 2026 Jobfinix All rights reserved.'}
         </p>
       </div>
     </footer>
