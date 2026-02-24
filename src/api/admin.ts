@@ -1,5 +1,5 @@
 import { hasBackend, getBaseUrl, apiRequest } from './client'
-import type { AdminLoginResponse, AdminApplication } from './types'
+import type { AdminLoginResponse, AdminApplication, AdminJobRole } from './types'
 
 const ADMIN_TOKEN_KEY = 'cage_admin_token'
 
@@ -184,6 +184,191 @@ export async function sendAdminTestEmail(to?: string): Promise<{ ok: boolean; er
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(to != null ? { to } : {}),
+    })
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+// ─── Companies ──────────────────────────────────────────────────────────────
+
+/** A company document as returned by GET /api/company */
+export interface AdminCompany {
+  _id: string
+  name: string
+  slug?: string
+  logo?: string | null
+  description?: string
+  active?: boolean
+}
+
+export interface CompanyPayload {
+  name: string
+  slug?: string
+  logo?: string
+  description?: string
+  active?: boolean
+}
+
+/** GET /api/company — public, no auth required. Returns all active companies. */
+export async function getCompanies(): Promise<AdminCompany[]> {
+  if (!hasBackend()) return []
+  try {
+    const data = await apiRequest<{ ok: boolean; data: AdminCompany[] } | AdminCompany[]>('/api/company')
+    // backend may return { ok, data: [...] } or bare array
+    return Array.isArray(data) ? data : (data as { data: AdminCompany[] }).data ?? []
+  } catch {
+    return []
+  }
+}
+
+/** GET /api/admin/companies — all companies (admin auth required). */
+export async function getAdminCompanies(): Promise<AdminCompany[]> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return []
+  try {
+    const data = await apiRequest<{ ok: boolean; data: AdminCompany[] } | AdminCompany[]>('/api/admin/companies', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return Array.isArray(data) ? data : (data as { data: AdminCompany[] }).data ?? []
+  } catch {
+    return []
+  }
+}
+
+/** POST /api/admin/companies — create a company (super admin only). */
+export async function createAdminCompany(
+  payload: CompanyPayload
+): Promise<{ ok: boolean; data?: AdminCompany; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    const res = await apiRequest<{ ok: boolean; data: AdminCompany }>('/api/admin/companies', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    })
+    return { ok: true, data: res.data ?? (res as unknown as AdminCompany) }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+/** PATCH /api/admin/companies/:id — update a company (super admin only). */
+export async function updateAdminCompany(
+  id: string,
+  payload: Partial<CompanyPayload>
+): Promise<{ ok: boolean; data?: AdminCompany; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    const res = await apiRequest<{ ok: boolean; data: AdminCompany }>(`/api/admin/companies/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    })
+    return { ok: true, data: res.data ?? (res as unknown as AdminCompany) }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+/** DELETE /api/admin/companies/:id — delete a company (super admin only). */
+export async function deleteAdminCompany(
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    await apiRequest(`/api/admin/companies/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+// ─── Job Roles CRUD (/api/admin/job-roles) ─────────────────────────────────
+
+/** Payload for creating a job role (description is required by backend) */
+export interface JobRolePayload {
+  companyId?: string
+  title: string
+  description: string
+  department?: string
+  type?: string
+  location?: string
+  requirements?: string[]
+  qualifications?: string[]
+  deadline?: string | null
+  isActive?: boolean
+}
+
+/** GET /api/admin/job-roles — returns all roles visible to this admin */
+export async function getAdminJobRoles(companyId?: string): Promise<AdminJobRole[]> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return []
+  const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : ''
+  try {
+    const data = await apiRequest<AdminJobRole[]>(`/api/admin/job-roles${query}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
+  }
+}
+
+/** POST /api/admin/job-roles — create a new job role */
+export async function createAdminJobRole(
+  payload: JobRolePayload
+): Promise<{ ok: boolean; data?: AdminJobRole; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    const data = await apiRequest<AdminJobRole>('/api/admin/job-roles', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    })
+    return { ok: true, data }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+/** PATCH /api/admin/job-roles/:id — update an existing job role */
+export async function updateAdminJobRole(
+  id: string,
+  payload: Partial<JobRolePayload>
+): Promise<{ ok: boolean; data?: AdminJobRole; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    const data = await apiRequest<AdminJobRole>(`/api/admin/job-roles/${id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    })
+    return { ok: true, data }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Request failed' }
+  }
+}
+
+/** DELETE /api/admin/job-roles/:id — delete a job role */
+export async function deleteAdminJobRole(
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  const token = getStoredAdminToken()
+  if (!token || !hasBackend()) return { ok: false, error: 'Not connected' }
+  try {
+    await apiRequest<unknown>(`/api/admin/job-roles/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
     })
     return { ok: true }
   } catch (err) {

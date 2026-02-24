@@ -16,6 +16,7 @@ export interface RoleDetail {
   jobType: string
   location: string
   deadline: string
+  isActive?: boolean
   description?: string
   requirements?: string[]
   qualificationsIntro?: string
@@ -137,6 +138,7 @@ export interface OpportunityRole {
   type: string
   location: string
   deadline: string
+  isActive?: boolean
   company?: { name: string; logo?: string }
   companyId?: string
 }
@@ -229,3 +231,21 @@ export interface AdminApplication {
   company?: { _id?: string; name?: string; logo?: string | null }
   role?: { _id?: string; title?: string }
 }
+
+/** Job role from GET /api/admin/job-roles */
+export interface AdminJobRole {
+  _id: string
+  title: string
+  department?: string | null
+  type?: string | null
+  location?: string | null
+  description?: string | null
+  requirements?: string[]
+  qualifications?: string[]
+  deadline?: string | null
+  isActive?: boolean
+  companyId?: string | { _id: string; name?: string } | null
+  createdAt?: string
+  updatedAt?: string
+}
+

@@ -9,7 +9,6 @@ import ApplicationDetailModal, { ApplicationDetail } from '../components/Applica
 import { hasBackend } from '../api/client'
 import { getRoles, AFRESH_COMPANY_OBJECT_ID } from '../api/roles'
 import { getCompanyObjectId } from '../api/destination'
-import { MOCK_AFRESH_ROLES } from '../api/mockData'
 import type { RoleDetail } from '../api/types'
 
 const DEFAULT_COMPANY_ID = 'afresh'
@@ -46,6 +45,8 @@ const AfreshRoles = () => {
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
   const [viewingApplication, setViewingApplication] = useState<ApplicationDetail | null>(null)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 8
 
   // When backend is used, resolve company first then fetch roles by ObjectId so role ids are valid for apply.
   // If company doesn't resolve (e.g. "afresh" not in destination), try getRoles(slug) in case backend accepts it.
@@ -64,23 +65,11 @@ const AfreshRoles = () => {
         })
         .then((data) => {
           if (cancelled) return
-          const list = data ?? []
-          if (list.length > 0) {
-            setRoles(list)
-          } else if (companyId.toLowerCase() === 'afresh') {
-            setRoles(MOCK_AFRESH_ROLES)
-          } else {
-            setRoles([])
-          }
+          setRoles(data ?? [])
         })
         .catch((err) => {
           if (!cancelled) {
-            if (companyId.toLowerCase() === 'afresh') {
-              setRoles(MOCK_AFRESH_ROLES)
-              setError(null)
-            } else {
-              setError(err instanceof Error ? err.message : 'Failed to load roles')
-            }
+            setError(err instanceof Error ? err.message : 'Failed to load roles')
           }
         })
         .finally(() => {
@@ -108,7 +97,9 @@ const AfreshRoles = () => {
   }, [roles])
 
   const filteredRoles = useMemo(() => {
-    let list = activeFilter === 'All' ? roles : roles.filter((role) => role.department === activeFilter)
+    // Hide inactive roles on public pages
+    let list = roles.filter((r) => r.isActive !== false)
+    list = activeFilter === 'All' ? list : list.filter((role) => role.department === activeFilter)
     const q = searchQuery.trim().toLowerCase()
     if (q) {
       list = list.filter(
@@ -119,6 +110,13 @@ const AfreshRoles = () => {
     }
     return list
   }, [roles, activeFilter, searchQuery])
+
+  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / PAGE_SIZE))
+  const pagedRoles = filteredRoles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // Reset to page 1 whenever filters change
+  const handleFilterChange = (f: string) => { setActiveFilter(f); setPage(1) }
+  const handleSearch = (q: string) => { setSearchQuery(q); setPage(1) }
 
   const companyIdForApply = resolvedCompanyId ?? (OBJECT_ID_REGEX.test(companyId) ? companyId : (companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : null))
 
@@ -222,9 +220,17 @@ const AfreshRoles = () => {
         {loading ? (
           <p className="roles-loading">Loading…</p>
         ) : filteredRoles.length === 0 ? (
-          <p className="roles-empty">
-            {searchQuery.trim() ? 'No roles match your search or filters.' : 'No roles match your filters.'}
-          </p>
+          <div className="roles-coming-soon">
+            {searchQuery.trim() || activeFilter !== 'All' ? (
+              <p className="roles-empty">No roles match your search or filters.</p>
+            ) : (
+              <>
+                <span className="roles-coming-soon-icon" aria-hidden>🚀</span>
+                <h2 className="roles-coming-soon-title">Coming Soon</h2>
+                <p className="roles-coming-soon-text">No open positions right now — check back soon!</p>
+              </>
+            )}
+          </div>
         ) : (
           <>
             <div className="roles-search-row">
@@ -234,7 +240,7 @@ const AfreshRoles = () => {
                 placeholder="Search for roles..."
                 aria-label="Search for roles"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
               <div className="roles-filters">
                 {filters.map((filter) => (
@@ -242,7 +248,7 @@ const AfreshRoles = () => {
                     key={filter}
                     type="button"
                     className={`roles-filter-btn ${activeFilter === filter ? 'roles-filter-btn--active' : ''}`}
-                    onClick={() => setActiveFilter(filter)}
+                    onClick={() => handleFilterChange(filter)}
                   >
                     {filter}
                   </button>
@@ -251,7 +257,7 @@ const AfreshRoles = () => {
             </div>
 
             <ul className="roles-list">
-              {filteredRoles.map((role) => (
+              {pagedRoles.map((role) => (
                 <li
                   key={role.id}
                   className="roles-card"
@@ -302,7 +308,7 @@ const AfreshRoles = () => {
                       className="roles-apply-btn"
                       onClick={(e) => {
                         e.stopPropagation()
-                        openApplyModal(role)
+                        setSelectedRole(role)
                       }}
                     >
                       Apply Now
@@ -311,6 +317,29 @@ const AfreshRoles = () => {
                 </li>
               ))}
             </ul>
+            {totalPages > 1 && (
+              <div className="roles-pagination">
+                <button
+                  type="button"
+                  className="roles-page-btn"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Previous page"
+                >
+                  ← Prev
+                </button>
+                <span className="roles-page-info">{page} / {totalPages}</span>
+                <button
+                  type="button"
+                  className="roles-page-btn"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  aria-label="Next page"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>

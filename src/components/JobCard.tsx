@@ -1,7 +1,4 @@
 import { MapPin, Briefcase, Clock } from 'lucide-react'
-import { getImagePath } from '../lib/assets'
-
-const cbrillianceLogo = getImagePath('image/cbrilliance.png')
 
 export interface Job {
   id: string
@@ -21,14 +18,40 @@ interface JobCardProps {
   isApplied?: boolean
 }
 
+/** Returns up to 2 uppercase initials from a company name */
+function getInitials(name: string): string {
+  const words = name.trim().split(/\s+/)
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+  return (words[0][0] + words[1][0]).toUpperCase()
+}
+
+/** Pick a consistent hue from the company name */
+function getAvatarHue(name: string): number {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return Math.abs(hash) % 360
+}
+
 const JobCard = ({ job, onApplyClick, isApplied }: JobCardProps) => {
-  const logo = job.companyLogo ?? cbrillianceLogo
+  const hue = getAvatarHue(job.company)
+
   return (
     <div className="job-card">
+      {job.isFeatured && <span className="job-featured-badge">Featured</span>}
       <div className="job-card-header">
         <div className="job-company">
           <div className="company-logo-wrapper">
-            <img src={logo} alt={job.company} className="company-logo" />
+            {job.companyLogo ? (
+              <img src={job.companyLogo} alt={job.company} className="company-logo" />
+            ) : (
+              <div
+                className="company-logo-initials"
+                style={{ background: `hsl(${hue},55%,38%)` }}
+                aria-label={job.company}
+              >
+                {getInitials(job.company)}
+              </div>
+            )}
           </div>
           <div className="company-info">
             <span className="company-name">{job.company}</span>
@@ -41,9 +64,7 @@ const JobCard = ({ job, onApplyClick, isApplied }: JobCardProps) => {
         <span className="job-type-badge">{job.jobType}</span>
       </div>
 
-      <h3 className="job-title">
-        {job.title}
-      </h3>
+      <h3 className="job-title">{job.title}</h3>
 
       <div className="job-category">
         <Briefcase className="category-icon" size={16} />
@@ -73,12 +94,3 @@ const JobCard = ({ job, onApplyClick, isApplied }: JobCardProps) => {
 }
 
 export default JobCard
-
-
-
-
-
-
-
-
-
