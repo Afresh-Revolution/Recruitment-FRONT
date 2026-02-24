@@ -7,47 +7,26 @@ import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 import ApplicationDetailModal from '../components/ApplicationDetailModal'
 import { ArrowRight } from 'lucide-react'
-import { hasBackend } from '../api/client'
-import { getOpportunities } from '../api/opportunities'
-import type { RoleDetail, OpportunityRole, OpportunitiesData } from '../api/types'
+import { getRoles, AFRESH_COMPANY_OBJECT_ID } from '../api/roles'
+import type { RoleDetail } from '../api/types'
 import type { ApplicationDetail } from '../components/ApplicationDetailModal'
+import { getImagePath } from '../lib/assets'
 
-// ── fallback data when backend is not connected ─────────────────────────────
-const DEFAULT_JOBS: Job[] = [
-  { id: '1', company: 'Cbrilliance', location: 'Remote', jobType: 'Full-time', title: 'Senior Frontend Engineer', department: 'Engineering', deadline: 'Oct 25', isFeatured: true },
-  { id: '2', company: 'Cbrilliance', location: 'Hybrid', jobType: 'Full-time', title: 'Product Designer', department: 'Design', deadline: 'Oct 30' },
-  { id: '3', company: 'Cbrilliance', location: 'Remote', jobType: 'Contract', title: 'DevOps Specialist', department: 'Engineering', deadline: 'Nov 05' },
-]
+const afrLogo = getImagePath('image/Afr-Logo.jpg')
 
-const DEFAULT_ROLES: RoleDetail[] = [
-  { id: '1', title: 'Senior Frontend Engineer', department: 'Engineering', jobType: 'Full-time', location: 'Remote', deadline: 'Oct 25' },
-  { id: '2', title: 'Product Designer', department: 'Design', jobType: 'Full-time', location: 'Hybrid', deadline: 'Oct 30' },
-  { id: '3', title: 'DevOps Specialist', department: 'Engineering', jobType: 'Contract', location: 'Remote', deadline: 'Nov 05' },
-]
 
 // ── mapping helpers ──────────────────────────────────────────────────────────
-function mapRoleToJob(r: OpportunityRole): Job {
+function mapRoleToJob(r: RoleDetail): Job {
   return {
-    id: r._id,
-    company: r.company?.name ?? 'Company',
-    companyLogo: r.company?.logo ?? undefined,
+    id: r.id,
+    company: 'AfrESH',
+    companyLogo: afrLogo,
     location: r.location ?? 'Remote',
-    jobType: (r.type as Job['jobType']) ?? 'Full-time',
+    jobType: (r.jobType as Job['jobType']) ?? 'Full-time',
     title: r.title,
     department: r.department ?? '',
-    deadline: r.deadline ? new Date(r.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
+    deadline: r.deadline ?? '',
     isFeatured: false,
-  }
-}
-
-function mapRoleToDetail(r: OpportunityRole): RoleDetail {
-  return {
-    id: r._id,
-    title: r.title,
-    department: r.department,
-    jobType: r.type ?? 'Full-time',
-    location: r.location,
-    deadline: r.deadline ? new Date(r.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
   }
 }
 
@@ -82,7 +61,7 @@ function saveApplication(roleId: string, companyName: string, formData: Record<s
 
 // ── component ────────────────────────────────────────────────────────────────
 const Opportunities = () => {
-  const [apiData, setApiData] = useState<OpportunitiesData | null>(null)
+  const [roles, setRoles] = useState<RoleDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null)
   const [applyModalRole, setApplyModalRole] = useState<RoleDetail | null>(null)
@@ -90,39 +69,12 @@ const Opportunities = () => {
   const [viewingApplication, setViewingApplication] = useState<ApplicationDetail | null>(null)
 
   useEffect(() => {
-    getOpportunities()
-      .then(setApiData)
+    getRoles(AFRESH_COMPANY_OBJECT_ID)
+      .then((data) => setRoles((data ?? []).filter((r) => r.isActive !== false)))
       .finally(() => setLoading(false))
   }, [])
 
-  const { jobs, roles, roleByJobId } = useMemo(() => {
-    const liveRoles = apiData?.roles?.filter((r) => r.isActive !== false) ?? []
-    if (liveRoles.length > 0) {
-      return {
-        jobs: liveRoles.map(mapRoleToJob),
-        roles: liveRoles.map(mapRoleToDetail),
-        roleByJobId: new Map(
-          liveRoles.map((r) => [r._id, {
-            roleId: r._id,
-            companyId: r.companyId ?? '',
-            companyName: r.company?.name ?? 'Company',
-          }])
-        ),
-      }
-    }
-    const useMock = !hasBackend()
-    return {
-      jobs: DEFAULT_JOBS,
-      roles: DEFAULT_ROLES,
-      roleByJobId: useMock
-        ? new Map([
-          ['1', { roleId: '1', companyId: 'cbrilliance', companyName: 'Cbrilliance' }],
-          ['2', { roleId: '2', companyId: 'cbrilliance', companyName: 'Cbrilliance' }],
-          ['3', { roleId: '3', companyId: 'cbrilliance', companyName: 'Cbrilliance' }],
-        ])
-        : new Map(),
-    }
-  }, [apiData])
+  const jobs = useMemo(() => roles.map(mapRoleToJob), [roles])
 
   const handleApplyClick = (job: Job) => {
     const existing = getApplication(job.id)
@@ -133,14 +85,14 @@ const Opportunities = () => {
     const role = roles.find((r) => r.id === job.id) ?? null
     if (role) {
       setSelectedRole(role)
-      setApplyMeta(roleByJobId.get(job.id) ?? null)
+      setApplyMeta({ roleId: role.id, companyId: AFRESH_COMPANY_OBJECT_ID, companyName: 'AfrESH' })
     }
   }
 
   const handleOpenApply = (role: RoleDetail) => {
     setSelectedRole(null)
     setApplyModalRole(role)
-    setApplyMeta(roleByJobId.get(role.id) ?? { roleId: role.id, companyId: '', companyName: 'Company' })
+    setApplyMeta({ roleId: role.id, companyId: AFRESH_COMPANY_OBJECT_ID, companyName: 'AfrESH' })
   }
 
   return (
@@ -178,13 +130,9 @@ const Opportunities = () => {
         <div className="trending-badge">Trending Opportunities</div>
         <h1 className="page-title">Available Roles</h1>
 
-        {loading && <p className="opportunities-loading">Loading roles…</p>}
-
-        {!loading && jobs.length === 0 && (
-          <p className="opportunities-empty">No roles available at the moment.</p>
-        )}
-
-        {!loading && jobs.length > 0 && (
+        {loading ? (
+          <p className="opportunities-loading">Loading roles…</p>
+        ) : (
           <div className="jobs-grid">
             {jobs.map((job) => (
               <JobCard
