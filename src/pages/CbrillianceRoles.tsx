@@ -6,7 +6,7 @@ import Footer from '../components/Footer'
 import JobDetailModal from '../components/JobDetailModal'
 import ApplyJobModal from '../components/ApplyJobModal'
 import ApplicationDetailModal, { ApplicationDetail } from '../components/ApplicationDetailModal'
-import { getRoles } from '../api/roles'
+import { getRoles, getRoleDetail } from '../api/roles'
 import { getCompanyObjectId } from '../api/destination'
 import type { RoleDetail } from '../api/types'
 
@@ -252,8 +252,8 @@ const CbrillianceRoles = () => {
                   className="roles-card"
                   role="button"
                   tabIndex={0}
-                  onClick={() => setSelectedRole(role)}
-                  onKeyDown={(e) => e.key === 'Enter' && setSelectedRole(role)}
+                  onClick={() => getRoleDetail(role).then(setSelectedRole)}
+                  onKeyDown={(e) => e.key === 'Enter' && getRoleDetail(role).then(setSelectedRole)}
                 >
                   <div className="roles-card-left">
                     <div className="roles-card-title-row">
@@ -271,7 +271,7 @@ const CbrillianceRoles = () => {
                       </span>
                       <span className="roles-card-meta-item roles-card-deadline">
                         <Clock size={14} aria-hidden />
-                        {role.deadline?.startsWith('Apply by') ? role.deadline : role.deadline ? `Apply by ${role.deadline}` : ''}
+                        {role.deadline}
                       </span>
                     </div>
                   </div>

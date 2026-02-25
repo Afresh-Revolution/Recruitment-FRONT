@@ -20,7 +20,16 @@ interface RoleSectionResponse {
 }
 
 function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
-  const deadline = r.applyByLabel ?? (r.deadline ? new Date(r.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '')
+  const MONTH_MAP: Record<string, string> = {
+    Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April',
+    May: 'May', Jun: 'June', Jul: 'July', Aug: 'August',
+    Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December',
+  }
+  const expandMonths = (s: string) => s.replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g, (m) => MONTH_MAP[m] ?? m)
+  const rawLabel = r.applyByLabel
+    ? `Apply before ${expandMonths(r.applyByLabel.replace(/^Apply by\s+/i, ''))}`
+    : undefined
+  const deadline = rawLabel ?? (r.deadline ? `Apply before ${expandMonths(new Date(r.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }))}` : '')
   return {
     id: r._id,
     title: r.title,
@@ -29,7 +38,7 @@ function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
     location: r.location,
     deadline,
     isActive: r.isActive,
-    applicationDeadline: r.applyByLabel,
+    applicationDeadline: rawLabel,
     description: r.description,
     requirements: r.requirements,
     qualifications: r.qualifications,
@@ -57,4 +66,38 @@ export async function getRolesSection(companyId: string): Promise<RoleSectionRes
   }
   const queryId = companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : companyId
   return apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(queryId)}`)
+}
+
+/**
+ * Enrich a RoleDetail with description/requirements/qualifications from the admin endpoint.
+ * The public /api/role listing omits these fields; the admin endpoint returns them.
+ * Falls back to the original role if the call fails or no token is available.
+ */
+export async function getRoleDetail(role: RoleDetail): Promise<RoleDetail> {
+  if (!hasBackend()) return role
+  try {
+    const { getStoredAdminToken } = await import('./admin')
+    const token = getStoredAdminToken()
+    if (!token) return role
+    const list = await apiRequest<BackendAdminRole[]>('/api/admin/job-roles', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const found = Array.isArray(list) ? list.find((r) => r._id === role.id) : null
+    if (!found) return role
+    return {
+      ...role,
+      description: found.description ?? role.description,
+      requirements: found.requirements ?? role.requirements,
+      qualifications: found.qualifications ?? role.qualifications,
+    }
+  } catch {
+    return role
+  }
+}
+
+interface BackendAdminRole {
+  _id: string
+  description?: string
+  requirements?: string[]
+  qualifications?: string[]
 }
