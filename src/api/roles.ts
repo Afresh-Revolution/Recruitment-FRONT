@@ -20,7 +20,16 @@ interface RoleSectionResponse {
 }
 
 function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
-  const deadline = r.applyByLabel ?? (r.deadline ? new Date(r.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '')
+  const MONTH_MAP: Record<string, string> = {
+    Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April',
+    May: 'May', Jun: 'June', Jul: 'July', Aug: 'August',
+    Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December',
+  }
+  const expandMonths = (s: string) => s.replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g, (m) => MONTH_MAP[m] ?? m)
+  const rawLabel = r.applyByLabel
+    ? `Apply before ${expandMonths(r.applyByLabel.replace(/^Apply by\s+/i, ''))}`
+    : undefined
+  const deadline = rawLabel ?? (r.deadline ? `Apply before ${expandMonths(new Date(r.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }))}` : '')
   return {
     id: r._id,
     title: r.title,
@@ -29,7 +38,7 @@ function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
     location: r.location,
     deadline,
     isActive: r.isActive,
-    applicationDeadline: r.applyByLabel,
+    applicationDeadline: rawLabel,
     description: r.description,
     requirements: r.requirements,
     qualifications: r.qualifications,

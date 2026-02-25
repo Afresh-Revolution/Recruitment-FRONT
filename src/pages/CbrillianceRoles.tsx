@@ -271,7 +271,7 @@ const CbrillianceRoles = () => {
                       </span>
                       <span className="roles-card-meta-item roles-card-deadline">
                         <Clock size={14} aria-hidden />
-                        {role.deadline?.startsWith('Apply by') ? role.deadline : role.deadline ? `Apply by ${role.deadline}` : ''}
+                        {role.deadline}
                       </span>
                     </div>
                   </div>
