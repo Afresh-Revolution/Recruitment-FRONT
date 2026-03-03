@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['vite.svg'],
+      includeAssets: ['image/AfrESH-LOGO.png'],
       manifest: {
         name: 'Jobfinix Recruitment',
         short_name: 'Jobfinix',
@@ -22,6 +22,11 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         icons: [
+          {
+            src: '/image/AfrESH-LOGO.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
           {
             src: '/image/AfrESH-LOGO.png',
             sizes: '512x512',
