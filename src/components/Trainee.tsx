@@ -5,13 +5,13 @@ import { getTrainee } from '../api/trainee'
 
 const photographyWhite = getImagePath('image/photographyWhite.jpg')
 const photographyBlack = getImagePath('image/photographyBlack.jpg')
-const blacknative = getImagePath('image/blacknative.jpg')
-const scaladev = getImagePath('image/scaladev.jpg')
+const sanderson = getImagePath('image/sanderson.jpg')
+const designer = getImagePath('image/designerrrr.png')
 const DEFAULT_TRAINEES: Array<{ id: string; name: string; role: string; rating: number; image: string }> = [
   { id: '1', name: 'Amara Okeke', role: 'Java Developer', rating: 5, image: photographyBlack },
-  { id: '2', name: 'Folake Adebayo', role: 'PHP Developer', rating: 4.9, image: photographyWhite },
-  { id: '3', name: 'Tunde Bakare', role: 'React Developer', rating: 5, image: scaladev },
-  { id: '4', name: 'Emeka Okafor', role: 'Full Stack', rating: 4.8, image: blacknative },
+  { id: '2', name: 'Sanderson Stephen', role: 'Software Developer', rating: 5, image: sanderson },
+  { id: '3', name: 'Emmanuel Ola', role: 'UI/UX Designer', rating: 4.8, image: designer },
+  { id: '4', name: 'Folake Adebayo', role: 'PHP Developer', rating: 4.9, image: photographyWhite },
 ]
 
 const Trainee = () => {

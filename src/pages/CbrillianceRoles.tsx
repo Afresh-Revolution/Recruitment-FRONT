@@ -195,7 +195,7 @@ const CbrillianceRoles = () => {
           ← Back to Companies
         </Link>
         <h1 className="roles-title">Cbrilliance Roles</h1>
-        <p className="roles-subtitle">Find your next challenge and apply today.</p>
+        <p className="roles-subtitle">Explore opportunities at C-brilliance</p>
 
         {error && (
           <div className="roles-error-wrap" role="alert">
@@ -338,3 +338,7 @@ const CbrillianceRoles = () => {
 }
 
 export default CbrillianceRoles
+
+
+
+

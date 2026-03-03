@@ -115,6 +115,28 @@ body {
   }
 }
 
+.nav-install-btn {
+  border: 1px solid rgba(22, 101, 52, 0.75);
+  background: rgba(22, 101, 52, 0.22);
+  color: #dcfce7;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: rgba(22, 101, 52, 0.36);
+    border-color: rgba(34, 197, 94, 0.85);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
 .btn-signup-email {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   color: #ffffff;
@@ -1179,7 +1201,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .job-detail-overlay--portal {
@@ -1228,6 +1250,7 @@ body {
 .job-detail-content {
   padding: 2rem 1.75rem 1.75rem;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .job-detail-section {
@@ -1329,7 +1352,7 @@ body {
 .apply-job-overlay.job-detail-overlay {
   z-index: 9999;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .apply-job-dialog {
@@ -1381,6 +1404,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   min-width: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .apply-job-section {
@@ -3453,7 +3477,7 @@ body {
   justify-content: center;
   z-index: 1000;
   padding: 1.5rem;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .app-detail-modal {
@@ -3566,6 +3590,7 @@ body {
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .app-detail-section {
@@ -3936,6 +3961,11 @@ body {
     font-size: 0.95rem;
   }
 
+  .nav-install-btn {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
   .hero-main-content,
   .whychooseus-container,
   .chooseus-container {
@@ -4070,6 +4100,11 @@ body {
   .nav-link {
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
+  }
+
+  .nav-install-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.8rem;
   }
 
   .logo {
@@ -4461,6 +4496,11 @@ body {
   .nav-link {
     padding: 0.4rem 0.6rem;
     font-size: 0.8125rem;
+  }
+
+  .nav-install-btn {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.75rem;
   }
 
   /* Gallery: 1 slide on small mobile */

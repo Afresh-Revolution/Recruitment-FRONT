@@ -66,6 +66,9 @@ const BrowseJobs = () => {
     return partner.logo
   }
 
+  const roleCountsStillLoading = partners.length > 0 && partners.some((partner) => !roleCountsLoaded[partner.id])
+  const visiblePartners = partners.filter((partner) => (openRoleCounts[partner.id] ?? 0) > 0)
+
   return (
     <div className="browse-jobs-page">
       <Header />
@@ -85,13 +88,15 @@ const BrowseJobs = () => {
           </p>
         )}
 
-        {loading ? (
+        {loading || roleCountsStillLoading ? (
           <p className="browse-jobs-loading">Loading…</p>
         ) : partners.length === 0 ? (
           <p className="browse-jobs-empty">No partner companies available right now.</p>
+        ) : visiblePartners.length === 0 ? (
+          <p className="browse-jobs-empty">No partner companies with open roles right now.</p>
         ) : (
           <div className="browse-jobs-cards">
-            {partners.map((partner) => {
+            {visiblePartners.map((partner) => {
               const logoUrl = getLogoUrl(partner)
               return (
                 <div key={partner.id} className="browse-jobs-card">

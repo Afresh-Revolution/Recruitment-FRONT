@@ -206,7 +206,7 @@ const AfreshRoles = () => {
           ← Back to Companies
         </Link>
         <h1 className="roles-title">AfrESH Roles</h1>
-        <p className="roles-subtitle">Find your next challenge and apply today.</p>
+        <p className="roles-subtitle">Explore opportunities at AfrESH</p>
 
         {error && (
           <div className="roles-error-wrap" role="alert">
@@ -349,3 +349,5 @@ const AfreshRoles = () => {
 }
 
 export default AfreshRoles
+
+
