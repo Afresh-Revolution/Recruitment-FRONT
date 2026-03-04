@@ -69,6 +69,18 @@ export default function ApplicationDetailModal({
     }
   }, [application?.id, application?.status])
 
+  useEffect(() => {
+    if (!application) return
+    const prevBodyOverflow = document.body.style.overflow
+    const prevHtmlOverflow = document.documentElement.style.overflow
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevBodyOverflow
+      document.documentElement.style.overflow = prevHtmlOverflow
+    }
+  }, [application])
+
   if (!application) return null
 
   const displayId = application.id.length > 12 ? `APP-${application.id.slice(-6)}` : application.id
