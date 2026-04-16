@@ -18,6 +18,7 @@ const BrowseJobs = () => {
   const [error, setError] = useState<string | null>(null)
   /** Actual role count per partner id (from roles API); used so "X Open Roles" matches backend. */
   const [openRoleCounts, setOpenRoleCounts] = useState<Record<string, number>>({})
+  const [rolePreviews, setRolePreviews] = useState<Record<string, string[]>>({})
   /** Tracks which partner ids have finished loading their role counts */
   const [roleCountsLoaded, setRoleCountsLoaded] = useState<Record<string, boolean>>({})
 
@@ -47,8 +48,13 @@ const BrowseJobs = () => {
         .then((companyId) => getRoles(companyId ?? partner.id))
         .then((roles) => {
           if (!cancelled) {
-            const activeCount = roles.filter((r) => r.isActive !== false).length
+            const activeRoles = roles.filter((r) => r.isActive !== false)
+            const activeCount = activeRoles.length
             setOpenRoleCounts((prev) => ({ ...prev, [partner.id]: activeCount }))
+            setRolePreviews((prev) => ({
+              ...prev,
+              [partner.id]: activeRoles.slice(0, 3).map((role) => role.title),
+            }))
             setRoleCountsLoaded((prev) => ({ ...prev, [partner.id]: true }))
           }
         })
@@ -98,6 +104,7 @@ const BrowseJobs = () => {
           <div className="browse-jobs-cards">
             {visiblePartners.map((partner) => {
               const logoUrl = getLogoUrl(partner)
+              const previewTitles = rolePreviews[partner.id] ?? []
               return (
                 <div key={partner.id} className="browse-jobs-card">
                   <span className="browse-jobs-partner-badge">
@@ -127,6 +134,16 @@ const BrowseJobs = () => {
                           </div>
                         </div>
                       </>
+                    )}
+                    {previewTitles.length > 0 && (
+                      <div className="browse-jobs-role-preview" aria-hidden>
+                        <span className="browse-jobs-role-preview-label">Open now</span>
+                        <div className="browse-jobs-role-preview-strip">
+                          {previewTitles.map((title) => (
+                            <span key={title} className="browse-jobs-role-chip">{title}</span>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                   <div className="browse-jobs-card-content">

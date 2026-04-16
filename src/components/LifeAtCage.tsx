@@ -4,17 +4,17 @@ import { getImagePath } from '../lib/assets'
 import { getGallery } from '../api/gallery'
 
 const whitelady = getImagePath('image/whitelady.jpg')
-const group = getImagePath('image/group.jpg')
+const blessingw = getImagePath('image/blessingw.jpg')
 const selfie = getImagePath('image/selfie.jpg')
-const blacknative = getImagePath('image/blacknative.jpg')
+const willy = getImagePath('image/willy.jpg')
 const scaladev = getImagePath('image/scaladev.jpg')
 const filmconvert = getImagePath('image/filmconvert.jpg')
 
 const DEFAULT_IMAGES = [
   { id: 1, src: whitelady, alt: 'Woman at desk with laptop' },
-  { id: 2, src: group, alt: 'Group collaboration' },
+  { id: 2, src: blessingw, alt: 'Blessing W' },
   { id: 3, src: selfie, alt: 'Team member taking selfie' },
-  { id: 4, src: blacknative, alt: 'Team member' },
+  { id: 4, src: willy, alt: 'Willy' },
   { id: 5, src: scaladev, alt: 'Developer with laptop' },
   { id: 6, src: filmconvert, alt: 'Team working' },
 ]
@@ -41,6 +41,7 @@ const LifeAtCage = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [transitionEnabled, setTransitionEnabled] = useState(true)
+  const [isBouncing, setIsBouncing] = useState(false)
   const [imagesPerView, setImagesPerView] = useState(getImagesPerView)
 
   useEffect(() => {
@@ -79,6 +80,7 @@ const LifeAtCage = () => {
   const transformValue = `translateX(calc(-${currentIndex} * (${slideWidthPercent}% + ${GAP_REM}rem)))`
 
   const advance = useCallback(() => {
+    setIsBouncing(true)
     setCurrentIndex((prev) => {
       if (prev >= maxIndex) {
         setTransitionEnabled(false)
@@ -101,7 +103,14 @@ const LifeAtCage = () => {
     return () => clearInterval(interval)
   }, [isPaused, advance])
 
+  useEffect(() => {
+    if (!isBouncing) return
+    const timeout = window.setTimeout(() => setIsBouncing(false), 520)
+    return () => window.clearTimeout(timeout)
+  }, [isBouncing])
+
   const nextSlide = () => {
+    setIsBouncing(true)
     if (currentIndex >= maxIndex) {
       setTransitionEnabled(false)
       setCurrentIndex(0)
@@ -111,6 +120,7 @@ const LifeAtCage = () => {
   }
 
   const prevSlide = () => {
+    setIsBouncing(true)
     if (currentIndex === 0) {
       setTransitionEnabled(false)
       setCurrentIndex(maxIndex)
@@ -139,7 +149,7 @@ const LifeAtCage = () => {
           </button>
 
           <div
-            className="gallery-carousel"
+            className={`gallery-carousel ${isBouncing ? 'gallery-carousel--bounce' : ''}`}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -151,7 +161,10 @@ const LifeAtCage = () => {
               }}
             >
               {slides.map((image, i) => (
-                <div key={i < images.length ? image.id : `clone-${i}`} className="gallery-slide">
+                <div
+                  key={i < images.length ? image.id : `clone-${i}`}
+                  className={`gallery-slide ${i === currentIndex ? 'gallery-slide--focus' : ''}`}
+                >
                   <img src={image.src} alt={image.alt} className="gallery-image" />
                 </div>
               ))}
@@ -174,7 +187,10 @@ const LifeAtCage = () => {
               key={index}
               type="button"
               className={`gallery-dot ${displayIndex === index ? 'active' : ''}`}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => {
+                setIsBouncing(true)
+                setCurrentIndex(index)
+              }}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

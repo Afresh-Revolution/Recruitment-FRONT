@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getImagePath } from '../lib/assets'
 
@@ -7,8 +8,41 @@ const womenImg = getImagePath('image/women.jpg')
 const scalaImg = getImagePath('image/scaladev.jpg')
 
 const Hero = () => {
+  const [motion, setMotion] = useState({ x: 0, y: 0, scroll: 0 })
+
+  useEffect(() => {
+    const onScroll = () => {
+      const nextScroll = Math.min(window.scrollY * 0.18, 24)
+      setMotion((prev) => (prev.scroll === nextScroll ? prev : { ...prev, scroll: nextScroll }))
+    }
+
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const handlePointerMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const px = ((e.clientX - rect.left) / rect.width - 0.5) * 2
+    const py = ((e.clientY - rect.top) / rect.height - 0.5) * 2
+    setMotion((prev) => ({ ...prev, x: px, y: py }))
+  }
+
+  const resetPointerMotion = () => {
+    setMotion((prev) => ({ ...prev, x: 0, y: 0 }))
+  }
+
   return (
-    <div className="hero-main-content">
+    <div
+      className="hero-main-content"
+      onMouseMove={handlePointerMove}
+      onMouseLeave={resetPointerMotion}
+      style={{
+        ['--hero-move-x' as string]: `${motion.x.toFixed(3)}`,
+        ['--hero-move-y' as string]: `${motion.y.toFixed(3)}`,
+        ['--hero-scroll-shift' as string]: `${motion.scroll.toFixed(2)}px`,
+      }}
+    >
       <div className="hero-section">
         <h1 className="hero-title">
           Accelerate<br />

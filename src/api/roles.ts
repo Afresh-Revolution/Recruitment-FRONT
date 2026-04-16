@@ -19,7 +19,10 @@ interface RoleSectionResponse {
   roles: BackendRole[]
 }
 
-function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
+function mapBackendRoleToDetail(r: BackendRole, sectionLogo?: string | null, sectionName?: string | null): RoleDetail {
+  // Backend now provides companyName/companyLogo flat on the role object.
+  // Fall back to populated companyId object or section-level values for older responses.
+  const companyObj = typeof r.companyId === 'object' ? r.companyId : null
   const MONTH_MAP: Record<string, string> = {
     Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April',
     May: 'May', Jun: 'June', Jul: 'July', Aug: 'August',
@@ -38,10 +41,14 @@ function mapBackendRoleToDetail(r: BackendRole): RoleDetail {
     location: r.location,
     deadline,
     isActive: r.isActive,
+    // Prefer flat fields (new backend), fall back to nested or section-level
+    companyName: r.companyName ?? sectionName ?? companyObj?.name ?? undefined,
+    companyLogo: r.companyLogo ?? sectionLogo ?? companyObj?.logo ?? undefined,
     applicationDeadline: rawLabel,
     description: r.description,
     requirements: r.requirements,
     qualifications: r.qualifications,
+    image: r.image ?? undefined,
   }
 }
 
@@ -52,7 +59,7 @@ export async function getRoles(companyId: string): Promise<RoleDetail[]> {
   const queryId = companyId.toLowerCase() === 'afresh' ? AFRESH_COMPANY_OBJECT_ID : companyId
   try {
     const data = await apiRequest<RoleSectionResponse>(`/api/role?companyId=${encodeURIComponent(queryId)}`)
-    return (data.roles ?? []).map(mapBackendRoleToDetail)
+    return (data.roles ?? []).map(r => mapBackendRoleToDetail(r, data.companyLogo, data.companyName))
   } catch {
     // When backend is configured, don't return mock roles (they have non-ObjectId ids and submit will fail)
     return []
@@ -89,6 +96,8 @@ export async function getRoleDetail(role: RoleDetail): Promise<RoleDetail> {
       description: found.description ?? role.description,
       requirements: found.requirements ?? role.requirements,
       qualifications: found.qualifications ?? role.qualifications,
+      // Forward the image URL from the admin endpoint
+      image: found.image ?? role.image,
     }
   } catch {
     return role
@@ -100,4 +109,5 @@ interface BackendAdminRole {
   description?: string
   requirements?: string[]
   qualifications?: string[]
+  image?: string
 }

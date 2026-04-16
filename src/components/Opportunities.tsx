@@ -13,8 +13,9 @@ const afrLogo = getImagePath('image/Afr-Logo.jpg')
 function mapRoleToJob(r: RoleDetail): Job {
   return {
     id: r.id,
-    company: 'AfrESH',
-    companyLogo: afrLogo,
+    company: r.companyName || 'AfrESH',
+    companyLogo: r.companyLogo || afrLogo,
+    image: r.image,
     location: r.location ?? 'Remote',
     jobType: (r.jobType as Job['jobType']) ?? 'Full-time',
     title: r.title,
@@ -53,6 +54,13 @@ const Opportunities = () => {
     setApplyMeta({ roleId: role.id, companyId: AFRESH_COMPANY_OBJECT_ID })
   }
 
+  const handleBackToDetail = () => {
+    const role = applyModalRole
+    setApplyModalRole(null)
+    setApplyMeta(null)
+    if (role) setSelectedRole(role)
+  }
+
   return (
     <section className="opportunities-section">
       {selectedRole && (
@@ -68,6 +76,7 @@ const Opportunities = () => {
           roleId={applyMeta.roleId}
           jobTitle={applyModalRole.title}
           onClose={() => { setApplyModalRole(null); setApplyMeta(null) }}
+          onBack={handleBackToDetail}
         />
       )}
       <div className="trending-badge">Trending Opportunities</div>

@@ -4,6 +4,7 @@ export interface Job {
   id: string
   company: string
   companyLogo?: string
+  image?: string
   location: string
   jobType: 'Full-time' | 'Part-time' | 'Contract' | 'Internship'
   title: string
@@ -38,6 +39,7 @@ const JobCard = ({ job, onApplyClick, isApplied }: JobCardProps) => {
   return (
     <div className="job-card">
       {job.isFeatured && <span className="job-featured-badge">Featured</span>}
+
       <div className="job-card-header">
         <div className="job-company">
           <div className="company-logo-wrapper">
