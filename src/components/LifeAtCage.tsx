@@ -1,22 +1,20 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { getImagePath } from '../lib/assets'
 import { getGallery } from '../api/gallery'
 
-const whitelady = getImagePath('image/whitelady.jpg')
-const blessingw = getImagePath('image/blessingw.jpg')
-const selfie = getImagePath('image/selfie.jpg')
-const willy = getImagePath('image/willy.jpg')
-const scaladev = getImagePath('image/scaladev.jpg')
-const filmconvert = getImagePath('image/filmconvert.jpg')
+const afrphoto1 = getImagePath('image/Afrphoto_2026-04-21_12-03-37.jpg')
+const afrphoto2 = getImagePath('image/Afrphoto_2026-04-21_12-03-41.jpg')
+const afrphoto3 = getImagePath('image/Afrphoto_2026-04-21_12-03-44.jpg')
+const afrphoto4 = getImagePath('image/Afrphoto_2026-04-21_12-03-58.jpg')
+const afrphoto5 = getImagePath('image/Afrphoto_2026-04-21_12-04-01.jpg')
 
 const DEFAULT_IMAGES = [
-  { id: 1, src: whitelady, alt: 'Woman at desk with laptop' },
-  { id: 2, src: blessingw, alt: 'Blessing W' },
-  { id: 3, src: selfie, alt: 'Team member taking selfie' },
-  { id: 4, src: willy, alt: 'Willy' },
-  { id: 5, src: scaladev, alt: 'Developer with laptop' },
-  { id: 6, src: filmconvert, alt: 'Team working' },
+  { id: 1, src: afrphoto1, alt: 'Life at Cage 1' },
+  { id: 2, src: afrphoto2, alt: 'Life at Cage 2' },
+  { id: 3, src: afrphoto3, alt: 'Life at Cage 3' },
+  { id: 4, src: afrphoto4, alt: 'Life at Cage 4' },
+  { id: 5, src: afrphoto5, alt: 'Life at Cage 5' },
 ]
 
 const GAP_REM = 1.25
@@ -34,6 +32,8 @@ function getSlideWidthPercent(perView: number): number {
 }
 
 const LifeAtCage = () => {
+  const sectionRef = useRef<HTMLElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
   const [categoryTag, setCategoryTag] = useState('Life at Jobfinix')
   const [title, setTitle] = useState('Our Gallery')
   const [subtitle, setSubtitle] = useState('A glimpse into our community and culture.')
@@ -43,6 +43,18 @@ const LifeAtCage = () => {
   const [transitionEnabled, setTransitionEnabled] = useState(true)
   const [isBouncing, setIsBouncing] = useState(false)
   const [imagesPerView, setImagesPerView] = useState(getImagesPerView)
+
+  // Section reveal via IntersectionObserver
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true) },
+      { threshold: 0.12 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const onResize = () => setImagesPerView(getImagesPerView())
@@ -132,7 +144,10 @@ const LifeAtCage = () => {
   const displayIndex = currentIndex === maxIndex ? 0 : currentIndex
 
   return (
-    <section className="lifeatcage-section">
+    <section
+      ref={sectionRef}
+      className={`lifeatcage-section${isVisible ? ' lifeatcage-section--visible' : ''}`}
+    >
       <div className="lifeatcage-container">
         <div className="lifeatcage-badge">{categoryTag}</div>
         <h2 className="lifeatcage-title">{title}</h2>
@@ -169,6 +184,13 @@ const LifeAtCage = () => {
                 </div>
               ))}
             </div>
+
+            {/* Auto-play progress bar — key prop restarts CSS animation on every slide change */}
+            {!isPaused && (
+              <div className="gallery-progress-wrap">
+                <div key={currentIndex} className="gallery-progress-bar" />
+              </div>
+            )}
           </div>
 
           <button

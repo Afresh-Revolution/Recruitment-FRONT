@@ -5,7 +5,7 @@ import { getImagePath } from '../lib/assets'
 const laptopImg = getImagePath('image/laptop.jpg')
 const programmerImg = getImagePath('image/programmer.jpg')
 const womenImg = getImagePath('image/women.jpg')
-const scalaImg = getImagePath('image/scaladev.jpg')
+const scalaImg = getImagePath('image/plangs.jpg')
 
 const Hero = () => {
   const [motion, setMotion] = useState({ x: 0, y: 0, scroll: 0 })
