@@ -123,6 +123,13 @@ const AfreshRoles = () => {
   const openApplyModal = (role: RoleDetail) => {
     if (appliedRoleIds.has(role.id)) return
     setApplyModalRole(role)
+    setSelectedRole(null)
+  }
+
+  const handleBackToDetail = () => {
+    const role = applyModalRole
+    setApplyModalRole(null)
+    if (role) setSelectedRole(role)
   }
 
   const isApplied = (roleId: string) => appliedRoleIds.has(roleId)
@@ -168,6 +175,7 @@ const AfreshRoles = () => {
             setApplyModalRole(null)
             setSelectedRole(null)
           }}
+          onBack={handleBackToDetail}
           onSuccess={(roleId, formData) => {
             addAppliedRoleId(applyModalRole.id)
             setAppliedRoleIds(getAppliedRoleIds())
@@ -257,15 +265,21 @@ const AfreshRoles = () => {
             </div>
 
             <ul className="roles-list">
-              {pagedRoles.map((role) => (
+              {pagedRoles.map((role, index) => (
                 <li
                   key={role.id}
                   className="roles-card"
+                  style={{ ['--roles-stagger' as string]: `${index * 90}ms` }}
                   role="button"
                   tabIndex={0}
                   onClick={() => getRoleDetail(role).then(setSelectedRole)}
                   onKeyDown={(e) => e.key === 'Enter' && getRoleDetail(role).then(setSelectedRole)}
                 >
+                  {role.image && (
+                    <div className="roles-card-image-wrap">
+                      <img src={role.image} alt="" className="roles-card-image" aria-hidden />
+                    </div>
+                  )}
                   <div className="roles-card-left">
                     <div className="roles-card-title-row">
                       <h2 className="roles-card-title">{role.title}</h2>

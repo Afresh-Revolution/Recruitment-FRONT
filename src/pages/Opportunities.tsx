@@ -21,6 +21,7 @@ function mapRoleToJob(r: RoleDetail): Job {
     id: r.id,
     company: 'AfrESH',
     companyLogo: afrLogo,
+    image: r.image,
     location: r.location ?? 'Remote',
     jobType: (r.jobType as Job['jobType']) ?? 'Full-time',
     title: r.title,

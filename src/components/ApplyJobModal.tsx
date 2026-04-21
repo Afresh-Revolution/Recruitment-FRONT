@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Upload, AlertCircle } from 'lucide-react'
+import { X, Upload, AlertCircle, ArrowLeft } from 'lucide-react'
 import { submitApplication } from '../api/formdata'
 import { getCompanyObjectId } from '../api/destination'
 
@@ -46,6 +46,8 @@ interface ApplyJobModalProps {
   roleId: string
   jobTitle: string
   onClose: () => void
+  /** Called to go back to the job detail modal */
+  onBack?: () => void
   /** Called when user dismisses the success overlay (so parent can mark this role as Applied). */
   onSuccess?: (roleId: string, formData?: any) => void
   /** When set, a notice is shown and the submit button is disabled (e.g. for preview/mock roles). */
@@ -64,7 +66,7 @@ interface FormErrors {
   attachment?: string
 }
 
-const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submissionDisabled }: ApplyJobModalProps) => {
+const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onBack, onSuccess, submissionDisabled }: ApplyJobModalProps) => {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -251,13 +253,20 @@ const ApplyJobModal = ({ companyId, roleId, jobTitle, onClose, onSuccess, submis
       aria-labelledby="apply-job-title"
     >
       <div className="apply-job-dialog" onClick={(e) => e.stopPropagation()}>
-        <button ref={closeButtonRef} type="button" className="job-detail-close" onClick={handleClose} aria-label="Close">
-          <X size={20} />
-        </button>
-
-        <h2 id="apply-job-title" className="apply-job-title">
-          Apply Job - {jobTitle}
-        </h2>
+        <div className="apply-job-header">
+          {onBack && (
+            <button type="button" className="apply-job-back" onClick={onBack} aria-label="Back to job details">
+              <ArrowLeft size={18} />
+              <span>Back</span>
+            </button>
+          )}
+          <h2 id="apply-job-title" className="apply-job-title">
+            Apply Job - {jobTitle}
+          </h2>
+          <button ref={closeButtonRef} type="button" className="job-detail-close" onClick={handleClose} aria-label="Close">
+            <X size={20} />
+          </button>
+        </div>
 
         {submissionDisabled && (
           <div className="apply-job-notice" role="alert">

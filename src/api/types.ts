@@ -17,6 +17,9 @@ export interface RoleDetail {
   location: string
   deadline: string
   isActive?: boolean
+  companyName?: string
+  companyLogo?: string
+  image?: string
   description?: string
   requirements?: string[]
   qualificationsIntro?: string
@@ -66,13 +69,18 @@ export interface BackendRole {
   requirements?: string[]
   qualifications?: string[]
   isActive?: boolean
+  image?: string
   applyByLabel?: string
   applyLink?: string
-  /** Company ObjectId string or populated { _id, name, logo } */
+  /** New flat fields (standardized response) */
+  companyName?: string
+  companyLogo?: string
+  /** Legacy: Company ObjectId string or populated { _id, name, logo } */
   companyId?: string | { _id: string; name?: string; logo?: string | null }
   createdAt?: string
   updatedAt?: string
 }
+
 
 /** Single-role API response (e.g. GET /api/role/:id or create role) */
 export interface RoleApiResponse {
@@ -244,6 +252,7 @@ export interface AdminJobRole {
   qualifications?: string[]
   deadline?: string | null
   isActive?: boolean
+  image?: string | null
   companyId?: string | { _id: string; name?: string } | null
   createdAt?: string
   updatedAt?: string

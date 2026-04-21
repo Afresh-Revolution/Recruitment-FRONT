@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import Header from '../components/Header'
 import ApplicationDetailModal from '../components/ApplicationDetailModal'
-import { Search, Filter, Download, Eye, LogOut, RefreshCw, Briefcase, Plus, Pencil, Trash2, X, Check } from 'lucide-react'
+import { Search, Filter, Download, Eye, LogOut, RefreshCw, Briefcase, Plus, Pencil, Trash2, X, Check, ImagePlus } from 'lucide-react'
 import { hasBackend, getBaseUrl } from '../api/client'
 import {
   getStoredAdminToken,
@@ -168,6 +168,7 @@ const EMPTY_ROLE_FORM: JobRolePayload = {
   qualifications: [],
   deadline: '',
   isActive: true,
+  image: null,
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -224,6 +225,10 @@ const Admin = () => {
   // delete confirm
   const [deletingRoleId, setDeletingRoleId] = useState<string | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  // image upload
+  const [roleImageUploading, setRoleImageUploading] = useState(false)
+  const [roleImageError, setRoleImageError] = useState<string | null>(null)
+  const roleImageInputRef = useRef<HTMLInputElement>(null)
 
   // ── companies tab state ───────────────────────────────────────────────────
   const EMPTY_COMPANY_FORM: CompanyPayload = { name: '', slug: '', logo: '', description: '', active: true }
@@ -570,6 +575,7 @@ const Admin = () => {
     setEditingRoleId(null)
     setRoleFormData(EMPTY_ROLE_FORM)
     setRoleFormError(null)
+    setRoleImageError(null)
     setRoleFormOpen(true)
     fetchCompaniesForForm()
   }
@@ -588,8 +594,10 @@ const Admin = () => {
       qualifications: role.qualifications ?? [],
       deadline: role.deadline ?? '',
       isActive: role.isActive !== false,
+      image: role.image ?? null,
     })
     setRoleFormError(null)
+    setRoleImageError(null)
     setRoleFormOpen(true)
     fetchCompaniesForForm()
   }
@@ -597,7 +605,34 @@ const Admin = () => {
   const closeRoleForm = () => {
     setRoleFormOpen(false)
     setRoleFormError(null)
+    setRoleImageError(null)
     setEditingRoleId(null)
+  }
+
+  // ── role image upload ────────────────────────────────────────────────────
+  const handleRoleImageUpload = async (file: File) => {
+    const base = getBaseUrl()
+    if (!base || !token) { setRoleImageError('Not connected'); return }
+    setRoleImageUploading(true)
+    setRoleImageError(null)
+    try {
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await fetch(`${base}/api/upload`, {
+        method: 'POST',
+        body: fd,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.message || 'Upload failed')
+      const url: string = data.secure_url || data.url || ''
+      if (!url) throw new Error('No URL returned from upload')
+      setRoleFormData((d) => ({ ...d, image: url }))
+    } catch (err) {
+      setRoleImageError(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setRoleImageUploading(false)
+      if (roleImageInputRef.current) roleImageInputRef.current.value = ''
+    }
   }
 
   const handleRoleFormSubmit = async (e: React.FormEvent) => {
@@ -1004,6 +1039,7 @@ const Admin = () => {
                 <table className="admin-table admin-jr-table">
                   <thead>
                     <tr>
+                      <th>Image</th>
                       <th>Title</th>
                       <th>Company</th>
                       <th>Department</th>
@@ -1017,6 +1053,19 @@ const Admin = () => {
                   <tbody>
                     {jobRoles.map((role) => (
                       <tr key={role._id}>
+                        <td>
+                          {role.image ? (
+                            <img
+                              src={role.image}
+                              alt={role.title}
+                              className="admin-jr-table-img"
+                            />
+                          ) : (
+                            <div className="admin-jr-table-img admin-jr-table-img--empty" aria-label="No image">
+                              <ImagePlus size={14} aria-hidden />
+                            </div>
+                          )}
+                        </td>
                         <td className="admin-jr-title-cell">{role.title}</td>
                         <td>{getJobRoleCompanyName(role)}</td>
                         <td>{role.department || '—'}</td>
@@ -1459,6 +1508,65 @@ const Admin = () => {
                   onChange={(e) => setRoleFormData((d) => ({ ...d, isActive: e.target.checked }))}
                 />
                 <span className="admin-jr-hint-text">Inactive roles won't be shown to applicants.</span>
+              </div>
+
+              {/* ── Role Image Upload ── */}
+              <div className="admin-jr-field">
+                <label className="admin-jr-label">Role Image <span className="admin-jr-hint-text">(optional)</span></label>
+                <input
+                  ref={roleImageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  style={{ display: 'none' }}
+                  id="jr-image-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleRoleImageUpload(file)
+                  }}
+                />
+                {roleFormData.image ? (
+                  <div className="admin-jr-image-preview-wrap">
+                    <img
+                      src={roleFormData.image}
+                      alt="Role preview"
+                      className="admin-jr-image-preview"
+                    />
+                    <div className="admin-jr-image-actions">
+                      <button
+                        type="button"
+                        className="admin-jr-image-change-btn"
+                        onClick={() => roleImageInputRef.current?.click()}
+                        disabled={roleImageUploading}
+                      >
+                        <ImagePlus size={14} aria-hidden /> Change
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-jr-image-remove-btn"
+                        onClick={() => setRoleFormData((d) => ({ ...d, image: null }))}
+                        disabled={roleImageUploading}
+                      >
+                        <X size={14} aria-hidden /> Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="admin-jr-image-upload-btn"
+                    onClick={() => roleImageInputRef.current?.click()}
+                    disabled={roleImageUploading}
+                  >
+                    {roleImageUploading
+                      ? <><span className="admin-jr-image-spinner" aria-hidden /> Uploading…</>
+                      : <><ImagePlus size={16} aria-hidden /> Upload Image</>
+                    }
+                  </button>
+                )}
+                {roleImageError && (
+                  <p className="admin-jr-image-error" role="alert">{roleImageError}</p>
+                )}
+                <span className="admin-jr-hint-text">Shown on the role card and detail view. Max 10 MB (JPG, PNG, WebP).</span>
               </div>
 
               <div className="admin-jr-form-actions">

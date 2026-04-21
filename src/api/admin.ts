@@ -305,6 +305,7 @@ export interface JobRolePayload {
   qualifications?: string[]
   deadline?: string | null
   isActive?: boolean
+  image?: string | null
 }
 
 /** GET /api/admin/job-roles — returns all roles visible to this admin */
