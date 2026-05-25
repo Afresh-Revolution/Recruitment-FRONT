@@ -3,24 +3,22 @@ import { Star } from 'lucide-react'
 import { getImagePath } from '../lib/assets'
 import { getTrainee } from '../api/trainee'
 
-const photographyWhite = getImagePath('image/photographyWhite.jpg')
-const photographyBlack = getImagePath('image/photographyBlack.jpg')
-const sanderson = getImagePath('image/sanderson.jpg')
+const plangnan = getImagePath('image/plangnan.jpg')
+const sanderson = getImagePath('image/sandersonstep-original.jpg')
 const designer = getImagePath('image/designerrrr.png')
+const willy = getImagePath('image/willy.jpg')
 const DEFAULT_TRAINEES: Array<{ id: string; name: string; role: string; rating: number; image: string }> = [
-  { id: '1', name: 'Amara Okeke', role: 'Java Developer', rating: 5, image: photographyBlack },
+  { id: '1', name: 'Plangnan Samuel', role: 'Frontend Developer', rating: 5, image: plangnan },
   { id: '2', name: 'Sanderson Stephen', role: 'Software Developer', rating: 5, image: sanderson },
   { id: '3', name: 'Emmanuel Ola', role: 'UI/UX Designer', rating: 4.8, image: designer },
-  { id: '4', name: 'Folake Adebayo', role: 'PHP Developer', rating: 4.9, image: photographyWhite },
+  { id: '4', name: 'William Onoja', role: 'Full Stack Developer', rating: 4.9, image: willy },
 ]
 
 const Trainee = () => {
-  const [sectionTitle, setSectionTitle] = useState('We have over 150+ Trainee')
   const [trainees, setTrainees] = useState<Array<{ id: string; name: string; role: string; rating: number; image: string }>>(DEFAULT_TRAINEES)
 
   useEffect(() => {
     getTrainee().then((data) => {
-      if (data?.sectionTitle) setSectionTitle(data.sectionTitle)
       if (data?.trainees?.length) {
         setTrainees(
           data.trainees.map((t) => ({
@@ -38,7 +36,6 @@ const Trainee = () => {
   return (
     <section className="trainee-section">
       <div className="trainee-container">
-        <h2 className="trainee-title">{sectionTitle}</h2>
         <div className="trainees-grid">
           {trainees.map((trainee) => (
             <div key={trainee.id} className="trainee-card">

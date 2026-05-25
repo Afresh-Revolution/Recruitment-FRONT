@@ -511,35 +511,97 @@ const Admin = () => {
     const base = getBaseUrl()
     const downloadFilename = filename || getFilenameFromResumeUrl(url) || 'resume.pdf'
     try {
-      const headers: HeadersInit = { Accept: 'application/pdf,*/*' }
-      if (token && base) {
-        const fileSegment = getFilenameFromResumeUrl(url)
-        const authUrl = `${base}/api/admin/uploads/${encodeURIComponent(fileSegment)}`
-        headers['Authorization'] = `Bearer ${token}`
-        const res = await fetch(authUrl, { headers })
-        if (!res.ok) throw new Error('Download failed')
-        const blob = await res.blob()
-        const objectUrl = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = objectUrl
-        a.download = downloadFilename
-        a.click()
-        URL.revokeObjectURL(objectUrl)
-        return
+      const fileSegment = getFilenameFromResumeUrl(url)
+      const encoded = encodeURIComponent(fileSegment)
+
+      const tryFetch = async (
+        candidateUrl: string,
+        headers: HeadersInit
+      ): Promise<{ res: Response; url: string } | null> => {
+        try {
+          const res = await fetch(candidateUrl, { headers })
+          if (!res.ok) return null
+          return { res, url: candidateUrl }
+        } catch {
+          return null
+        }
       }
-      if (token) headers['Authorization'] = `Bearer ${token}`
-      const res = await fetch(url, { headers })
-      if (!res.ok) throw new Error('Download failed')
+
+      // Prefer authenticated admin endpoint when token is present.
+      const authHeaders: HeadersInit = token
+        ? { Accept: 'application/pdf,*/*', Authorization: `Bearer ${token}` }
+        : { Accept: 'application/pdf,*/*' }
+      const publicHeaders: HeadersInit = { Accept: 'application/pdf,*/*' }
+
+      const authCandidates = token
+        ? [
+          `/api/admin/uploads/${encoded}`,
+          ...(base ? [`${base}/api/admin/uploads/${encoded}`] : []),
+        ]
+        : []
+
+      const publicCandidates = [
+        // Absolute version of whatever we were given.
+        toAbsoluteAttachmentUrl(url) ?? url,
+        // Explicit public uploads route (some backends expose this).
+        `/uploads/${encoded}`,
+        ...(base ? [`${base}/uploads/${encoded}`] : []),
+      ]
+
+      let hit: { res: Response; url: string } | null = null
+      for (const u of authCandidates) {
+        // eslint-disable-next-line no-await-in-loop
+        hit = await tryFetch(u, authHeaders)
+        if (hit) break
+      }
+      if (!hit) {
+        for (const u of publicCandidates) {
+          // eslint-disable-next-line no-await-in-loop
+          hit = await tryFetch(u, publicHeaders)
+          if (hit) break
+        }
+      }
+      if (!hit) {
+        throw new Error(`Download failed for ${fileSegment}. Tried admin and public URLs.`)
+      }
+
+      const res = hit.res
+      const contentType = (res.headers.get('content-type') || '').toLowerCase()
+      const disposition = res.headers.get('content-disposition') || ''
+      const headerFilename = disposition.match(/filename\*?=(?:UTF-8''|")?([^\";]+)/i)?.[1]?.trim()
+      const safeHeaderFilename = headerFilename ? decodeURIComponent(headerFilename.replace(/^"+|"+$/g, '')) : undefined
       const blob = await res.blob()
+
+      // Guardrail: if backend returned HTML/JSON (often an error page), don't save it as a "PDF".
+      if (
+        contentType.includes('text/html') ||
+        contentType.includes('application/json') ||
+        contentType.includes('text/plain')
+      ) {
+        const text = await blob.text()
+        throw new Error(
+          `Downloaded content is not a file (content-type: ${contentType || 'unknown'}). ` +
+          `Server responded: ${text.slice(0, 300)}`
+        )
+      }
+
       const objectUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = objectUrl
-      a.download = downloadFilename
+      a.download = safeHeaderFilename || downloadFilename
+      a.style.display = 'none'
+      document.body.appendChild(a)
       a.click()
-      URL.revokeObjectURL(objectUrl)
+      a.remove()
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000)
     } catch (e) {
       console.error('Resume download failed', e)
-      window.open(url, '_blank', 'noopener,noreferrer')
+      // Last-resort: open absolute URL in a new tab (helps show backend error page).
+      const fallbackUrl = toAbsoluteAttachmentUrl(url) ?? url
+      window.open(fallbackUrl, '_blank', 'noopener,noreferrer')
+      window.alert(
+        'CV download failed. A new tab was opened with the file URL; if you see a 404/401, the backend may not be exposing the file. Check the browser Network tab for the failing request status.'
+      )
     }
   }
 
